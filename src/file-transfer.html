@@ -1,106 +1,143 @@
 <script type="text/javascript">
     RED.nodes.registerType('file-transfer', {
-        category : 'storage',
-        color    : 'burlywood',
-        defaults : {
-            name            : { value : ""},
-            dynamic         : { value : false},
-            action          : {
-                value    : "move",
-                validate : function(v) {
-                    if ($("#node-input-dynamic").length ? $("#node-input-dynamic").prop("checked") : this.dynamic)
+        category: 'storage',
+        color: 'burlywood',
+        defaults: {
+            name: { value: '' },
+            dynamic: { value: false },
+            action: {
+                value: 'move',
+                validate: function (v) {
+                    if (
+                        $('#node-input-dynamic').length
+                            ? $('#node-input-dynamic').prop('checked')
+                            : this.dynamic
+                    )
                         return true;
-                    return !!v && v.trim() !== "";
-                }
+                    return !!v && v.trim() !== '';
+                },
             },
-            source          : {
-                value    : "",
-                validate : function(v) {
-                    if ($("#node-input-dynamic").length ? $("#node-input-dynamic").prop("checked") : this.dynamic)
+            source: {
+                value: '',
+                validate: function (v) {
+                    if (
+                        $('#node-input-dynamic').length
+                            ? $('#node-input-dynamic').prop('checked')
+                            : this.dynamic
+                    )
                         return true;
-                    if (!v || v.trim() === "") return false;
+                    if (!v || v.trim() === '') return false;
 
-                    var builtInValidator = RED.validators.typedInput("sourceType");
+                    var builtInValidator = RED.validators.typedInput('sourceType');
                     return builtInValidator.call(this, v);
-                }
+                },
             },
-            sourceType      : { value : "str"},
-            destination     : {
-                value    : "",
-                validate : function(v) {
-                    if ($("#node-input-dynamic").length ? $("#node-input-dynamic").prop("checked") : this.dynamic)
+            sourceType: { value: 'str' },
+            destination: {
+                value: '',
+                validate: function (v) {
+                    if (
+                        $('#node-input-dynamic').length
+                            ? $('#node-input-dynamic').prop('checked')
+                            : this.dynamic
+                    )
                         return true;
-                    if (($("#node-input-action").length ? $("#node-input-action").val() : this.action) === "delete")
+                    if (
+                        ($('#node-input-action').length
+                            ? $('#node-input-action').val()
+                            : this.action) === 'delete'
+                    )
                         return true;
-                    if (!v || v.trim() === "") return false;
+                    if (!v || v.trim() === '') return false;
 
-                    var builtInValidator = RED.validators.typedInput("destinationType");
+                    var builtInValidator = RED.validators.typedInput('destinationType');
                     return builtInValidator.call(this, v);
-                }
+                },
             },
-            destinationType : { value : "str"},
-            createDir       : { value : true}
+            destinationType: { value: 'str' },
+            createDir: { value: true },
         },
-        inputs  : 1,
-        outputs : 1,
-        icon    : "font-awesome/fa-files-o",
-        label   : function() { return this.name || (!this.dynamic ? (this.action + " " + this.source).trim() : "file-transfer"); },
-        oneditprepare: function() {
-            $("#node-input-source").typedInput({
-                default: 'str', types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'], typeField: $("#node-input-sourceType")
+        inputs: 1,
+        outputs: 1,
+        icon: 'font-awesome/fa-files-o',
+        label: function () {
+            return (
+                this.name ||
+                (!this.dynamic ? (this.action + ' ' + this.source).trim() : 'file-transfer')
+            );
+        },
+        oneditprepare: function () {
+            $('#node-input-source').typedInput({
+                default: 'str',
+                types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+                typeField: $('#node-input-sourceType'),
             });
-            $("#node-input-destination").typedInput({
-                default: 'str', types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'], typeField: $("#node-input-destinationType")
+            $('#node-input-destination').typedInput({
+                default: 'str',
+                types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+                typeField: $('#node-input-destinationType'),
             });
 
-            $("#node-input-action").on("change", function() {
+            $('#node-input-action').on('change', function () {
                 var action = $(this).val();
 
-                switch(action) {
-                    case "move":
-                    case "copy":
-                        $("#row-source").show();
-                        $("#row-destination").show();
-                        $("#row-createDir").show();
+                switch (action) {
+                    case 'move':
+                    case 'copy':
+                        $('#row-source').show();
+                        $('#row-destination').show();
+                        $('#row-createDir').show();
                         break;
-                    case "delete":
-                        $("#row-source").show();
-                        $("#row-destination").hide();
-                        $("#row-createDir").hide();
+                    case 'delete':
+                        $('#row-source').show();
+                        $('#row-destination').hide();
+                        $('#row-createDir').hide();
                         break;
                 }
             });
 
-            $("#node-input-dynamic").on("change", function() {
-                if ($(this).prop("checked")) {
-                    $("#row-action").hide();
-                    $("#row-source").hide();
-                    $("#row-destination").hide();
-                    $("#row-createDir").hide();
+            $('#node-input-dynamic').on('change', function () {
+                if ($(this).prop('checked')) {
+                    $('#row-action').hide();
+                    $('#row-source').hide();
+                    $('#row-destination').hide();
+                    $('#row-createDir').hide();
                 } else {
-                    $("#row-action").show();
-                    $("#node-input-action").trigger("change");
+                    $('#row-action').show();
+                    $('#node-input-action').trigger('change');
                 }
             });
 
-            $("#node-input-dynamic").trigger("change");
-        }
+            $('#node-input-dynamic').trigger('change');
+        },
     });
 </script>
 
-
 <script type="text/html" data-template-name="file-transfer">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name">
+            <i class="fa fa-tag"></i>
+            <span>Name</span>
+        </label>
+        <input type="text" id="node-input-name" placeholder="Name" />
     </div>
     <div class="form-row">
         <label for="node-input-dynamic">&nbsp;</label>
-        <input type="checkbox" id="node-input-dynamic" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-dynamic" style="width: 70%;"><i class="fa fa-usb"></i> Load from msg.file</label>
+        <input
+            type="checkbox"
+            id="node-input-dynamic"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-dynamic" style="width: 70%;">
+            <i class="fa fa-usb"></i>
+            Load from msg.file
+        </label>
     </div>
     <div class="form-row" id="row-action">
-        <label for="node-input-action"><i class="fa fa-tasks"></i> Action</label>
+        <label for="node-input-action">
+            <i class="fa fa-tasks"></i>
+            Action
+        </label>
         <select id="node-input-action" style="width: 70%">
             <option value="move">Move / Rename</option>
             <option value="copy">Copy</option>
@@ -108,88 +145,100 @@
         </select>
     </div>
     <div class="form-row" id="row-source">
-        <label for="node-input-source"><i class="fa fa-file"></i> Source</label>
-        <input type="text" id="node-input-source">
-        <input type="hidden" id="node-input-sourceType">
+        <label for="node-input-source">
+            <i class="fa fa-file"></i>
+            Source
+        </label>
+        <input type="text" id="node-input-source" />
+        <input type="hidden" id="node-input-sourceType" />
     </div>
     <div class="form-row" id="row-destination">
-        <label for="node-input-destination"><i class="fa fa-folder-open"></i> Destination</label>
-        <input type="text" id="node-input-destination">
-        <input type="hidden" id="node-input-destinationType">
+        <label for="node-input-destination">
+            <i class="fa fa-folder-open"></i>
+            Destination
+        </label>
+        <input type="text" id="node-input-destination" />
+        <input type="hidden" id="node-input-destinationType" />
     </div>
     <div class="form-row" id="row-createDir">
         <label for="node-input-createDir">&nbsp;</label>
-        <input type="checkbox" id="node-input-createDir" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-createDir" style="width: auto"><i class="fa fa-plus"></i> Create target directory</label>
+        <input
+            type="checkbox"
+            id="node-input-createDir"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-createDir" style="width: auto">
+            <i class="fa fa-plus"></i>
+            Create target directory
+        </label>
     </div>
 </script>
 
-
 <script type="text/markdown" data-help-name="file-transfer">
-A node to move, rename, copy, or delete a file on the file system.
+    A node to move, rename, copy, or delete a file on the file system.
 
-### Properties
+    ### Properties
 
-* **Load from msg.file** *boolean*\
-  If enabled, the node will ignore the UI properties and expect `msg.file.action`, `msg.file.source`, and optionally `msg.file.destination` to be provided dynamically.
+    - **Load from msg.file** _boolean_\
+      If enabled, the node will ignore the UI properties and expect `msg.file.action`, `msg.file.source`, and optionally `msg.file.destination` to be provided dynamically.
 
-* **Action** *dropdown*\
-  Select the file operation to perform: Move / Rename, Copy, or Delete.
+    - **Action** _dropdown_\
+      Select the file operation to perform: Move / Rename, Copy, or Delete.
 
-* **Source** *string | msg*\
-  The absolute path to the target file you want to transfer or delete.
+    - **Source** _string | msg_\
+      The absolute path to the target file you want to transfer or delete.
 
-* **Destination** *string | msg*\
-  The absolute path to the destination. Must include the target file name. *(Hidden if action is set to Delete).*
+    - **Destination** _string | msg_\
+      The absolute path to the destination. Must include the target file name. _(Hidden if action is set to Delete)._
 
-* **Create target directory** *boolean*\
-  If enabled, the node will automatically create the destination directory structure if it does not already exist. *(Hidden if action is set to Delete).*
+    - **Create target directory** _boolean_\
+      If enabled, the node will automatically create the destination directory structure if it does not already exist. _(Hidden if action is set to Delete)._
 
----
+    ---
 
-### Inputs
+    ### Inputs
 
-* **msg.file** *object*\
-  The incoming message triggers the operation.
+    - **msg.file** _object_\
+      The incoming message triggers the operation.
 
-* **msg.file.action** *string*\
-  The action to execute if triggered dynamically (`move`, `copy`, or `delete`).
+    - **msg.file.action** _string_\
+      The action to execute if triggered dynamically (`move`, `copy`, or `delete`).
 
-* **msg.file.source** *string*\
-  The original absolute path to the file.
+    - **msg.file.source** _string_\
+      The original absolute path to the file.
 
-* **msg.file.destination** *string*\
-  The destination absolute path to the file (omitted for delete operations).
+    - **msg.file.destination** _string_\
+      The destination absolute path to the file (omitted for delete operations).
 
-### Outputs
+    ### Outputs
 
-* **msg.file** *object*\
-  The object containing the event details.
+    - **msg.file** _object_\
+      The object containing the event details.
 
-* **msg.file.filetype** *string*\
-  The type of item that triggered the event (`file`).
+    - **msg.file.filetype** _string_\
+      The type of item that triggered the event (`file`).
 
-* **msg.file.action** *string*\
-  The action performed (`move`, `copy`, or `delete`).
+    - **msg.file.action** _string_\
+      The action performed (`move`, `copy`, or `delete`).
 
-* **msg.file.source** *string*\
-  The normalized absolute path of the original file.
+    - **msg.file.source** _string_\
+      The normalized absolute path of the original file.
 
-* **msg.file.destination** *string*\
-  The normalized absolute path of the destination (omitted for delete operations).
+    - **msg.file.destination** _string_\
+      The normalized absolute path of the destination (omitted for delete operations).
 
-* **msg.file.path** *string*\
-  The normalized absolute path to the resulting item (the destination if moved/copied, or the source if deleted).
+    - **msg.file.path** _string_\
+      The normalized absolute path to the resulting item (the destination if moved/copied, or the source if deleted).
 
-* **msg.file.dir** *string*\
-  The "absolute" path to the parent directory of the resulting item.
+    - **msg.file.dir** _string_\
+      The "absolute" path to the parent directory of the resulting item.
 
-* **msg.file.base** *string*\
-  The name of the resulting item *with* the extension.
+    - **msg.file.base** _string_\
+      The name of the resulting item _with_ the extension.
 
-* **msg.file.name** *string*\
-  The name of the resulting item *without* the extension.
+    - **msg.file.name** _string_\
+      The name of the resulting item _without_ the extension.
 
-* **msg.file.ext** *string*\
-  The file extension of the resulting item, including the dot.
+    - **msg.file.ext** _string_\
+      The file extension of the resulting item, including the dot.
 </script>

@@ -1,43 +1,50 @@
-module.exports = function(RED) {
-    const fs   = require("fs");
-    const path = require("path");
+module.exports = function (RED) {
+    const fs = require('fs');
+    const path = require('path');
 
     function FileTransferNode(config) {
         RED.nodes.createNode(this, config);
 
-        this.dynamic         = config.dynamic;
-        this.action          = config.action;
-        this.source          = config.source;
-        this.sourceType      = config.sourceType || "str";
-        this.destination     = config.destination;
-        this.destinationType = config.destinationType || "str";
-        this.createDir       = config.createDir;
+        this.dynamic = config.dynamic;
+        this.action = config.action;
+        this.source = config.source;
+        this.sourceType = config.sourceType || 'str';
+        this.destination = config.destination;
+        this.destinationType = config.destinationType || 'str';
+        this.createDir = config.createDir;
 
         var node = this;
 
-        node.on("input", function(msg, send, done) {
+        node.on('input', function (msg, send, done) {
             try {
-                const currentAction = node.dynamic ? (msg.file && msg.file.action) : node.action;
-                const srcRaw        = node.dynamic ? (msg.file && msg.file.source) : RED.util.evaluateNodeProperty(node.source, node.sourceType, node, msg);
-                const destRaw       = node.dynamic ? (msg.file && msg.file.destination) : RED.util.evaluateNodeProperty(node.destination, node.destinationType, node, msg);
+                const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
+                const srcRaw = node.dynamic
+                    ? msg.file && msg.file.source
+                    : RED.util.evaluateNodeProperty(node.source, node.sourceType, node, msg);
+                const destRaw = node.dynamic
+                    ? msg.file && msg.file.destination
+                    : RED.util.evaluateNodeProperty(
+                          node.destination,
+                          node.destinationType,
+                          node,
+                          msg,
+                      );
 
-                if (!currentAction)
-                    throw new Error("Action is missing");
+                if (!currentAction) throw new Error('Action is missing');
 
-                if (!srcRaw)
-                    throw new Error("Source path is missing");
+                if (!srcRaw) throw new Error('Source path is missing');
 
                 const srcPath = path.normalize(srcRaw);
-                let destPath  = null;
-                let parsed    = null;
+                let destPath = null;
+                let parsed = null;
 
-                if (currentAction !== "delete") {
-                    if (!destRaw) throw new Error("Destination path is missing");
+                if (currentAction !== 'delete') {
+                    if (!destRaw) throw new Error('Destination path is missing');
 
                     destPath = path.normalize(destRaw);
 
                     if (srcPath === destPath) {
-                        finishAction("Source and Destination are identical", srcPath, destPath);
+                        finishAction('Source and Destination are identical', srcPath, destPath);
                         return;
                     }
 
@@ -52,19 +59,19 @@ module.exports = function(RED) {
                 }
 
                 var file = {
-                    filetype    : "file",
-                    action      : currentAction,
-                    source      : srcPath,
-                    destination : destPath,
-                    path        : destPath || srcPath,
-                    dir         : parsed.dir,
-                    name        : parsed.name,
-                    base        : parsed.base,
-                    ext         : parsed.ext
+                    filetype: 'file',
+                    action: currentAction,
+                    source: srcPath,
+                    destination: destPath,
+                    path: destPath || srcPath,
+                    dir: parsed.dir,
+                    name: parsed.name,
+                    base: parsed.base,
+                    ext: parsed.ext,
                 };
 
-                switch(currentAction) {
-                    case "copy":
+                switch (currentAction) {
+                    case 'copy':
                         fs.copyFile(srcPath, destPath, (err) => {
                             if (err) return handleError(err);
 
@@ -73,7 +80,7 @@ module.exports = function(RED) {
                         });
                         break;
 
-                    case "move":
+                    case 'move':
                         fs.rename(srcPath, destPath, (err) => {
                             if (err && err.code === 'EXDEV') {
                                 fs.copyFile(srcPath, destPath, (copyErr) => {
@@ -94,7 +101,7 @@ module.exports = function(RED) {
                         });
                         break;
 
-                    case "delete":
+                    case 'delete':
                         if (destRaw) node.log(`Destination Path ${destPath} will be ignored`);
 
                         fs.unlink(srcPath, (err) => {
@@ -110,26 +117,25 @@ module.exports = function(RED) {
                         throw new Error(`Unknown action type: ${currentAction}`);
                 }
 
-                function finishAction(statusText, sPath, dPath) {
-                    node.status({fill: "green", shape: "dot", text: statusText});
+                function finishAction(statusText /*, sPath, dPath*/) {
+                    node.status({ fill: 'green', shape: 'dot', text: statusText });
                     send(msg);
                     if (done) done();
                     setTimeout(() => node.status({}), 5000);
                 }
 
                 function handleError(err) {
-                    node.status({fill: "red", shape: "dot", text: err.code || "Error"});
+                    node.status({ fill: 'red', shape: 'dot', text: err.code || 'Error' });
                     if (done) done(err);
                     else node.error(err, msg);
                 }
-
             } catch (err) {
-                node.status({fill: "red", shape: "dot", text: "Configuration error"});
+                node.status({ fill: 'red', shape: 'dot', text: 'Configuration error' });
                 if (done) done(err);
                 else node.error(err, msg);
             }
         });
     }
 
-    RED.nodes.registerType("file-transfer", FileTransferNode);
-}
+    RED.nodes.registerType('file-transfer', FileTransferNode);
+};

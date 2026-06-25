@@ -1,53 +1,65 @@
 <script type="text/javascript">
     RED.nodes.registerType('file-read', {
-        category : 'storage',
-        color    : 'burlywood',
-        defaults : {
-            name       : { value : "" },
-            dynamic    : { value : false },
-            action     : {
-                value    : "read",
-                validate : function(v) {
-                    if ($("#node-input-dynamic").length ? $("#node-input-dynamic").prop("checked") : this.dynamic)
+        category: 'storage',
+        color: 'burlywood',
+        defaults: {
+            name: { value: '' },
+            dynamic: { value: false },
+            action: {
+                value: 'read',
+                validate: function (v) {
+                    if (
+                        $('#node-input-dynamic').length
+                            ? $('#node-input-dynamic').prop('checked')
+                            : this.dynamic
+                    )
                         return true;
-                    return !!v && v.trim() !== "";
-                }
+                    return !!v && v.trim() !== '';
+                },
             },
-            source     : {
-                value    : "",
-                validate : function(v) {
-                    if ($("#node-input-dynamic").length ? $("#node-input-dynamic").prop("checked") : this.dynamic)
+            source: {
+                value: '',
+                validate: function (v) {
+                    if (
+                        $('#node-input-dynamic').length
+                            ? $('#node-input-dynamic').prop('checked')
+                            : this.dynamic
+                    )
                         return true;
-                    if (!v || v.trim() === "") return false;
-                    var builtInValidator = RED.validators.typedInput("sourceType");
+                    if (!v || v.trim() === '') return false;
+                    var builtInValidator = RED.validators.typedInput('sourceType');
                     return builtInValidator.call(this, v);
-                }
+                },
             },
-            sourceType : { value : "str" },
+            sourceType: { value: 'str' },
         },
-        inputs  : 1,
-        outputs : 1,
-        icon  : "file-in.svg",
-        label   : function() { return this.name || (!this.dynamic ? (this.action + " " + this.source).trim() : "file-read"); },
-        oneditprepare: function() {
-            $("#node-input-source").typedInput({
-                default: 'str', types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'], typeField: $("#node-input-sourceType")
+        inputs: 1,
+        outputs: 1,
+        icon: 'file-in.svg',
+        label: function () {
+            return (
+                this.name ||
+                (!this.dynamic ? (this.action + ' ' + this.source).trim() : 'file-read')
+            );
+        },
+        oneditprepare: function () {
+            $('#node-input-source').typedInput({
+                default: 'str',
+                types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+                typeField: $('#node-input-sourceType'),
             });
 
-            $("#node-input-dynamic").on("change", function() {
-                if ($(this).prop("checked"))
-                    $("#file-options-group").hide();
-                else
-                    $("#file-options-group").show();
+            $('#node-input-dynamic').on('change', function () {
+                if ($(this).prop('checked')) $('#file-options-group').hide();
+                else $('#file-options-group').show();
 
-                $("#node-input-source").trigger("change");
+                $('#node-input-source').trigger('change');
             });
 
-            $("#node-input-dynamic").trigger("change");
-        }
+            $('#node-input-dynamic').trigger('change');
+        },
     });
 </script>
-
 
 <style>
     .flex-checkbox-row {
@@ -56,7 +68,7 @@
         padding-left: 104px;
         margin-bottom: 12px;
     }
-    .flex-checkbox-row input[type="checkbox"] {
+    .flex-checkbox-row input[type='checkbox'] {
         width: auto !important;
         margin: 0 8px 0 0 !important;
     }
@@ -91,20 +103,29 @@
 
 <script type="text/html" data-template-name="file-read">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
-        <input type="text" id="node-input-name" placeholder="Name" class="input-width-70">
+        <label for="node-input-name">
+            <i class="fa fa-tag"></i>
+            <span>Name</span>
+        </label>
+        <input type="text" id="node-input-name" placeholder="Name" class="input-width-70" />
     </div>
 
     <div class="form-row flex-checkbox-row">
-        <input type="checkbox" id="node-input-dynamic" class="input-width-70">
-        <label for="node-input-dynamic"><i class="fa fa-usb"></i> Load from msg.file</label>
+        <input type="checkbox" id="node-input-dynamic" class="input-width-70" />
+        <label for="node-input-dynamic">
+            <i class="fa fa-usb"></i>
+            Load from msg.file
+        </label>
     </div>
 
     <fieldset id="file-options-group">
         <legend>File Options</legend>
 
         <div class="form-row" id="row-action">
-            <label for="node-input-action"><i class="fa fa-tasks"></i> Action</label>
+            <label for="node-input-action">
+                <i class="fa fa-tasks"></i>
+                Action
+            </label>
             <select id="node-input-action" class="input-width-70">
                 <option value="read">Read</option>
                 <option value="exists">Check Exists</option>
@@ -113,70 +134,72 @@
         </div>
 
         <div class="form-row" id="row-source">
-            <label for="node-input-source"><i class="fa fa-file"></i> Source Path</label>
-            <input type="text" id="node-input-source" class="input-width-70">
-            <input type="hidden" id="node-input-sourceType">
+            <label for="node-input-source">
+                <i class="fa fa-file"></i>
+                Source Path
+            </label>
+            <input type="text" id="node-input-source" class="input-width-70" />
+            <input type="hidden" id="node-input-sourceType" />
         </div>
     </fieldset>
 </script>
 
-
 <script type="text/markdown" data-help-name="file-read">
-A node to read a file, check its existence, or retrieve its statistics.
+    A node to read a file, check its existence, or retrieve its statistics.
 
-### Properties
+    ### Properties
 
-* **Load from msg.file** *boolean*\
-  If enabled, the node will ignore the UI properties and expect `msg.file.action` and `msg.file.path` to be provided dynamically.
+    - **Load from msg.file** _boolean_\
+      If enabled, the node will ignore the UI properties and expect `msg.file.action` and `msg.file.path` to be provided dynamically.
 
-* **Action** *dropdown*\
-  Select the operation to perform: Read, Check Exists, or Get Stat.
+    - **Action** _dropdown_\
+      Select the operation to perform: Read, Check Exists, or Get Stat.
 
-* **Source Path** *string | msg*\
-  The absolute path to the source file.
+    - **Source Path** _string | msg_\
+      The absolute path to the source file.
 
----
+    ---
 
-### Inputs
+    ### Inputs
 
-* **msg.file** *object*\
-  The incoming message triggers the operation.
+    - **msg.file** _object_\
+      The incoming message triggers the operation.
 
-* **msg.file.action** *string*\
-  The action to execute if triggered dynamically from msg.
+    - **msg.file.action** _string_\
+      The action to execute if triggered dynamically from msg.
 
-* **msg.file.path** *string*\
-  The source file to run the action on.
+    - **msg.file.path** _string_\
+      The source file to run the action on.
 
-### Outputs
+    ### Outputs
 
-* **msg.file** *object*\
-  The object containing the event details.
+    - **msg.file** _object_\
+      The object containing the event details.
 
-* **msg.file.filetype** *string*\
-  The type of item that triggered the event (`file`, `directory`).
+    - **msg.file.filetype** _string_\
+      The type of item that triggered the event (`file`, `directory`).
 
-* **msg.file.path** *string*\
-  The complete, normalized "absolute" path to the item.
+    - **msg.file.path** _string_\
+      The complete, normalized "absolute" path to the item.
 
-* **msg.file.dir** *string*\
-  The "absolute" path to the parent directory containing the item.
+    - **msg.file.dir** _string_\
+      The "absolute" path to the parent directory containing the item.
 
-* **msg.file.base** *string*\
-  The name of the file or directory *with* the extension.
+    - **msg.file.base** _string_\
+      The name of the file or directory _with_ the extension.
 
-* **msg.file.name** *string*\
-  The name of the file or directory *without* the extension.
+    - **msg.file.name** _string_\
+      The name of the file or directory _without_ the extension.
 
-* **msg.file.ext** *string*\
-  The file extension, including the dot.
+    - **msg.file.ext** _string_\
+      The file extension, including the dot.
 
-* **msg.file.data** *string | buffer*\
-  The file content if the action was `Read`.
+    - **msg.file.data** _string | buffer_\
+      The file content if the action was `Read`.
 
-* **msg.file.exists** *boolean*\
-  The exists status of the file if the action was `Check Exists`.
+    - **msg.file.exists** _boolean_\
+      The exists status of the file if the action was `Check Exists`.
 
-* **msg.file.stats** *object*\
-  The Node.js `fs.Stats` object for the file (will be `null` if unavailable) if the action was `Get Stat`.
+    - **msg.file.stats** _object_\
+      The Node.js `fs.Stats` object for the file (will be `null` if unavailable) if the action was `Get Stat`.
 </script>

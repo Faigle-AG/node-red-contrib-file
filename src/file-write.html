@@ -1,169 +1,214 @@
 <script type="text/javascript">
     RED.nodes.registerType('file-write', {
-        category : 'storage',
-        color    : 'burlywood',
-        defaults : {
-            name       : { value : ""},
-            dynamic    : { value : false},
-            action     : {
-                value    : "write",
-                validate : function(v) {
-                    if ($("#node-input-dynamic").length ? $("#node-input-dynamic").prop("checked") : this.dynamic)
+        category: 'storage',
+        color: 'burlywood',
+        defaults: {
+            name: { value: '' },
+            dynamic: { value: false },
+            action: {
+                value: 'write',
+                validate: function (v) {
+                    if (
+                        $('#node-input-dynamic').length
+                            ? $('#node-input-dynamic').prop('checked')
+                            : this.dynamic
+                    )
                         return true;
-                    return !!v && v.trim() !== "";
-                }
+                    return !!v && v.trim() !== '';
+                },
             },
-            target     : {
-                value    : "",
-                validate : function(v) {
-                    if ($("#node-input-dynamic").length ? $("#node-input-dynamic").prop("checked") : this.dynamic)
+            target: {
+                value: '',
+                validate: function (v) {
+                    if (
+                        $('#node-input-dynamic').length
+                            ? $('#node-input-dynamic').prop('checked')
+                            : this.dynamic
+                    )
                         return true;
-                    if (!v || v.trim() === "") return false;
+                    if (!v || v.trim() === '') return false;
 
-                    var builtInValidator = RED.validators.typedInput("targetType");
+                    var builtInValidator = RED.validators.typedInput('targetType');
                     return builtInValidator.call(this, v);
-                }
+                },
             },
-            targetType : { value : "str"},
-            data       : {
-                value    : "payload",
-                validate : function(v) {
-                    if ($("#node-input-dynamic").length ? $("#node-input-dynamic").prop("checked") : this.dynamic)
+            targetType: { value: 'str' },
+            data: {
+                value: 'payload',
+                validate: function (v) {
+                    if (
+                        $('#node-input-dynamic').length
+                            ? $('#node-input-dynamic').prop('checked')
+                            : this.dynamic
+                    )
                         return true;
-                    if (!v || v.trim() === "") return false;
+                    if (!v || v.trim() === '') return false;
 
-                    var builtInValidator = RED.validators.typedInput("dataType");
+                    var builtInValidator = RED.validators.typedInput('dataType');
                     return builtInValidator.call(this, v);
-                }
+                },
             },
-            dataType   : { value : "msg"},
-            createDir  : { value : true}
+            dataType: { value: 'msg' },
+            createDir: { value: true },
         },
-        inputs  : 1,
-        outputs : 1,
-        icon    : "file-out.svg",
-        label   : function() { return this.name || (!this.dynamic ? (this.action + " " + this.source).trim() : "file-write"); },
+        inputs: 1,
+        outputs: 1,
+        icon: 'file-out.svg',
+        label: function () {
+            return (
+                this.name ||
+                (!this.dynamic ? (this.action + ' ' + this.source).trim() : 'file-write')
+            );
+        },
         oneditprepare: function () {
-            $("#node-input-target").typedInput({
-                default: 'str', types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'], typeField: $("#node-input-sourceType")
+            $('#node-input-target').typedInput({
+                default: 'str',
+                types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+                typeField: $('#node-input-sourceType'),
             });
 
-            $("#node-input-data").typedInput({
-                default: 'str', types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'], typeField: $("#node-input-dataType")
+            $('#node-input-data').typedInput({
+                default: 'str',
+                types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+                typeField: $('#node-input-dataType'),
             });
 
-            $("#node-input-dynamic").on("change", function() {
-                if ($(this).prop("checked")) {
-                    $("#row-action").hide();
-                    $("#row-target").hide();
-                    $("#row-data").hide();
+            $('#node-input-dynamic').on('change', function () {
+                if ($(this).prop('checked')) {
+                    $('#row-action').hide();
+                    $('#row-target').hide();
+                    $('#row-data').hide();
                 } else {
-                    $("#row-action").show();
-                    $("#row-target").show();
-                    $("#row-data").show();
+                    $('#row-action').show();
+                    $('#row-target').show();
+                    $('#row-data').show();
                 }
 
-                $("#node-input-target").trigger("change");
-                $("#node-input-data").trigger("change");
+                $('#node-input-target').trigger('change');
+                $('#node-input-data').trigger('change');
             });
 
-            $("#node-input-dynamic").trigger("change");
-        }
+            $('#node-input-dynamic').trigger('change');
+        },
     });
 </script>
 
-
 <script type="text/html" data-template-name="file-write">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name">
+            <i class="fa fa-tag"></i>
+            <span>Name</span>
+        </label>
+        <input type="text" id="node-input-name" placeholder="Name" />
     </div>
     <div class="form-row">
         <label for="node-input-dynamic">&nbsp;</label>
-        <input type="checkbox" id="node-input-dynamic" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-dynamic" style="width: 70%;"><i class="fa fa-usb"></i> Load from msg.file</label>
+        <input
+            type="checkbox"
+            id="node-input-dynamic"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-dynamic" style="width: 70%;">
+            <i class="fa fa-usb"></i>
+            Load from msg.file
+        </label>
     </div>
     <div class="form-row" id="row-action">
-        <label for="node-input-action"><i class="fa fa-tasks"></i> Action</label>
+        <label for="node-input-action">
+            <i class="fa fa-tasks"></i>
+            Action
+        </label>
         <select id="node-input-action" style="width: 70%">
             <option value="write">Write (Overwrite)</option>
             <option value="append">Append</option>
         </select>
     </div>
     <div class="form-row" id="row-target">
-        <label for="node-input-target"><i class="fa fa-file"></i> Target Path</label>
-        <input type="text" id="node-input-target">
-        <input type="hidden" id="node-input-targetType">
+        <label for="node-input-target">
+            <i class="fa fa-file"></i>
+            Target Path
+        </label>
+        <input type="text" id="node-input-target" />
+        <input type="hidden" id="node-input-targetType" />
     </div>
     <div class="form-row" id="row-data">
-        <label for="node-input-data"><i class="fa fa-envelope"></i> Data</label>
-        <input type="text" id="node-input-data">
-        <input type="hidden" id="node-input-dataType">
+        <label for="node-input-data">
+            <i class="fa fa-envelope"></i>
+            Data
+        </label>
+        <input type="text" id="node-input-data" />
+        <input type="hidden" id="node-input-dataType" />
     </div>
     <div class="form-row">
         <label for="node-input-createDir">&nbsp;</label>
-        <input type="checkbox" id="node-input-createDir" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-createDir" style="width: auto"><i class="fa fa-plus"></i> Create target directory</label>
+        <input
+            type="checkbox"
+            id="node-input-createDir"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-createDir" style="width: auto">
+            <i class="fa fa-plus"></i>
+            Create target directory
+        </label>
     </div>
 </script>
 
-
 <script type="text/markdown" data-help-name="file-write">
-A node to write or append data to a file on the file system.
+    A node to write or append data to a file on the file system.
 
-### Properties
+    ### Properties
 
-* **Load from msg.file** *boolean*\
-  If enabled, the node will ignore the UI properties and expect `msg.file.action`, `msg.file.path`, and `msg.file.data` to be provided dynamically.
+    - **Load from msg.file** _boolean_\
+      If enabled, the node will ignore the UI properties and expect `msg.file.action`, `msg.file.path`, and `msg.file.data` to be provided dynamically.
 
-* **Action** *dropdown*\
-  Select whether to write (overwrite) the file or append data to the end of it.
+    - **Action** _dropdown_\
+      Select whether to write (overwrite) the file or append data to the end of it.
 
-* **Target Path** *string | msg*\
-  The absolute path to the destination file.
+    - **Target Path** _string | msg_\
+      The absolute path to the destination file.
 
-* **Data** *string | msg*\
-  The content to be written or appended to the file.
+    - **Data** _string | msg_\
+      The content to be written or appended to the file.
 
-* **Create target directory** *boolean*\
-  If enabled, the node will automatically create the target directory structure if it does not already exist.
+    - **Create target directory** _boolean_\
+      If enabled, the node will automatically create the target directory structure if it does not already exist.
 
----
+    ---
 
-### Inputs
+    ### Inputs
 
-* **msg.file** *object*\
-  The incoming message triggers the operation.
+    - **msg.file** _object_\
+      The incoming message triggers the operation.
 
-* **msg.file.action** *string*\
-  The action to execute if triggered dynamically (`write` or `append`).
+    - **msg.file.action** _string_\
+      The action to execute if triggered dynamically (`write` or `append`).
 
-* **msg.file.path** *string*\
-  The destination file path to write to.
+    - **msg.file.path** _string_\
+      The destination file path to write to.
 
-* **msg.file.data** *string | buffer | object*\
-  The data to write. Objects will be automatically stringified.
+    - **msg.file.data** _string | buffer | object_\
+      The data to write. Objects will be automatically stringified.
 
-### Outputs
+    ### Outputs
 
-* **msg.file** *object*\
-  The object containing the event details.
+    - **msg.file** _object_\
+      The object containing the event details.
 
-* **msg.file.filetype** *string*\
-  The type of item that triggered the event (`file`).
+    - **msg.file.filetype** _string_\
+      The type of item that triggered the event (`file`).
 
-* **msg.file.path** *string*\
-  The complete, normalized "absolute" path to the item.
+    - **msg.file.path** _string_\
+      The complete, normalized "absolute" path to the item.
 
-* **msg.file.dir** *string*\
-  The "absolute" path to the parent directory containing the item.
+    - **msg.file.dir** _string_\
+      The "absolute" path to the parent directory containing the item.
 
-* **msg.file.base** *string*\
-  The name of the file *with* the extension.
+    - **msg.file.base** _string_\
+      The name of the file _with_ the extension.
 
-* **msg.file.name** *string*\
-  The name of the file *without* the extension.
+    - **msg.file.name** _string_\
+      The name of the file _without_ the extension.
 
-* **msg.file.ext** *string*\
-  The file extension, including the dot.
+    - **msg.file.ext** _string_\
+      The file extension, including the dot.
 </script>
