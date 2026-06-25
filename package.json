@@ -1,16 +1,14 @@
 {
   "name": "@faigle/node-red-contrib-file",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "somewhat improved file handlers",
-
   "private": false,
   "license": "MIT",
-
   "node-red": {
     "nodes": {
-      "file-read"     : "src/file-read.js",
-      "file-write"    : "src/file-write.js",
-      "file-transfer" : "src/file-transfer.js"
+      "file-read": "src/file-read.js",
+      "file-write": "src/file-write.js",
+      "file-transfer": "src/file-transfer.js"
     }
   }
 }
