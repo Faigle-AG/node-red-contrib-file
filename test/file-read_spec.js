@@ -33,7 +33,9 @@ describe('file-read node', function () {
                 type: 'file-read',
                 name: 'read test file',
                 dynamic: false,
-                action: 'read',
+                actionRead: true,
+                actionExists: false,
+                actionStat: false,
                 source: INPUT_FILE,
                 sourceType: 'str',
             },
@@ -42,7 +44,7 @@ describe('file-read node', function () {
         helper.load(fileReadNode, flow, function () {
             const n1 = helper.getNode('n1');
             n1.should.have.property('name', 'read test file');
-            n1.should.have.property('action', 'read');
+            n1.should.have.property('actionRead', true);
             n1.should.have.property('source', INPUT_FILE);
             done();
         });
@@ -54,7 +56,9 @@ describe('file-read node', function () {
                 id: 'n1',
                 type: 'file-read',
                 dynamic: false,
-                action: 'read',
+                actionRead: true,
+                actionExists: false,
+                actionStat: false,
                 source: INPUT_FILE,
                 sourceType: 'str',
                 wires: [['h1']],
@@ -85,7 +89,9 @@ describe('file-read node', function () {
             {
                 id: 'n1',
                 type: 'file-read',
-                action: 'exists',
+                actionRead: false,
+                actionExists: true,
+                actionStat: false,
                 source: INPUT_FILE,
                 sourceType: 'str',
                 wires: [['h1']],
@@ -113,7 +119,9 @@ describe('file-read node', function () {
             {
                 id: 'n1',
                 type: 'file-read',
-                action: 'exists',
+                actionRead: false,
+                actionExists: true,
+                actionStat: false,
                 source: missing,
                 sourceType: 'str',
                 wires: [['h1']],
@@ -140,7 +148,9 @@ describe('file-read node', function () {
             {
                 id: 'n1',
                 type: 'file-read',
-                action: 'stat',
+                actionRead: false,
+                actionExists: false,
+                actionStat: true,
                 source: INPUT_FILE,
                 sourceType: 'str',
                 wires: [['h1']],

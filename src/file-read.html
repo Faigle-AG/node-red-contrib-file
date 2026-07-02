@@ -5,18 +5,9 @@
         defaults: {
             name: { value: '' },
             dynamic: { value: false },
-            action: {
-                value: 'read',
-                validate: function (v) {
-                    if (
-                        $('#node-input-dynamic').length
-                            ? $('#node-input-dynamic').prop('checked')
-                            : this.dynamic
-                    )
-                        return true;
-                    return !!v && v.trim() !== '';
-                },
-            },
+            actionRead: { value: true },
+            actionExists: { value: true },
+            actionStat: { value: true },
             source: {
                 value: '',
                 validate: function (v) {
@@ -37,10 +28,16 @@
         outputs: 1,
         icon: 'file-in.svg',
         label: function () {
-            return (
-                this.name ||
-                (!this.dynamic ? (this.action + ' ' + this.source).trim() : 'file-read')
-            );
+            if (this.name) return this.name;
+            if (this.dynamic) return 'file-read (dynamic)';
+
+            var acts = [];
+            if (this.actionRead) acts.push('read');
+            if (this.actionExists) acts.push('exists');
+            if (this.actionStat) acts.push('stat');
+
+            var actStr = acts.join('+') || 'no action';
+            return (actStr + ' ' + (this.source || '')).trim() || 'file-read';
         },
         oneditprepare: function () {
             $('#node-input-source').typedInput({
@@ -82,7 +79,6 @@
         padding: 12px !important;
         margin-bottom: 12px !important;
         border-radius: 4px !important;
-        display: block !important;
     }
 
     fieldset.node-red-fieldset legend {
@@ -95,7 +91,6 @@
         margin-bottom: 0 !important;
     }
 
-    /* Replaces inline 70% width styles */
     .input-width-70 {
         width: 70% !important;
     }
@@ -118,19 +113,40 @@
         </label>
     </div>
 
-    <fieldset id="file-options-group">
+    <fieldset id="file-options-group" class="node-red-fieldset">
         <legend>File Options</legend>
 
         <div class="form-row" id="row-action">
-            <label for="node-input-action">
+            <label>
                 <i class="fa fa-tasks"></i>
-                Action
+                Actions
             </label>
-            <select id="node-input-action" class="input-width-70">
-                <option value="read">Read</option>
-                <option value="exists">Check Exists</option>
-                <option value="stat">Get Stat</option>
-            </select>
+            <div style="display:inline-block; width:70%;">
+                <label style="width:auto; margin-right:10px;">
+                    <input
+                        type="checkbox"
+                        id="node-input-actionRead"
+                        style="width:auto; margin:0 4px 0 0;"
+                    />
+                    Read
+                </label>
+                <label style="width:auto; margin-right:10px;">
+                    <input
+                        type="checkbox"
+                        id="node-input-actionExists"
+                        style="width:auto; margin:0 4px 0 0;"
+                    />
+                    Check Exists
+                </label>
+                <label style="width:auto;">
+                    <input
+                        type="checkbox"
+                        id="node-input-actionStat"
+                        style="width:auto; margin:0 4px 0 0;"
+                    />
+                    Get Stat
+                </label>
+            </div>
         </div>
 
         <div class="form-row" id="row-source">
@@ -146,61 +162,64 @@
 
 <!-- prettier-ignore -->
 <script type="text/markdown" data-help-name="file-read">
-A node to read a file, check its existence, or retrieve its statistics.
+    A node to read a file, check its existence, or retrieve its statistics.
 
-### Properties
+    ### Properties
 
-- **Load from msg.file** _boolean_ \
-  If enabled, the node will ignore the UI properties and expect `msg.file.action` and `msg.file.path` to be provided dynamically.
+    - **Load from msg.file** _boolean_ \
+      If enabled, the node will ignore the UI properties and expect `msg.file.action` and `msg.file.path` to be provided dynamically.
 
-- **Action** _dropdown_ \
-  Select the operation to perform: Read, Check Exists, or Get Stat.
+    - **Actions** _checkboxes_ \
+      Select one or more operation to perform on the file:
+      - **Read content**: Populates `msg.file.data` with the file contents.
+      - **Check exists**: Populates `msg.file.exists` with a boolean.
+      - **Get stat**: Populates `msg.file.stats` with a standard fs.Stats object.
 
-- **Source Path** _string | msg | flow | global | env | JSONata_ \
-  The absolute path to the source file.
+    - **Source Path** _string | msg | flow | global | env | JSONata_ \
+      The absolute path to the source file.
 
----
+    ---
 
-### Inputs
+    ### Inputs used in dynamic mode
 
-- **msg.file** _object_ \
-  The incoming message triggers the operation.
+    - **msg.file** _object_ \
+      The incoming message triggers the operation.
 
-- **msg.file.action** _string_ \
-  The action to execute if triggered dynamically from msg.
+    - **msg.file.action** _string_ \
+      The action to execute.
 
-- **msg.file.path** _string_ \
-  The source file to run the action on.
+    - **msg.file.path** _string_ \
+      The source file to run the action on.
 
-### Outputs
+    ### Outputs
 
-- **msg.file** _object_ \
-  The object containing the event details.
+    - **msg.file** _object_ \
+      The object containing the event details.
 
-- **msg.file.filetype** _string_ \
-  The type of item that triggered the event (`file`, `directory`).
+    - **msg.file.filetype** _string_ \
+      The type of item that triggered the event (`file`, `directory`).
 
-- **msg.file.path** _string_ \
-  The complete, normalized "absolute" path to the item.
+    - **msg.file.path** _string_ \
+      The complete, normalized "absolute" path to the item.
 
-- **msg.file.dir** _string_ \
-  The "absolute" path to the parent directory containing the item.
+    - **msg.file.dir** _string_ \
+      The "absolute" path to the parent directory containing the item.
 
-- **msg.file.base** _string_ \
-  The name of the file or directory _with_ the extension.
+    - **msg.file.base** _string_ \
+      The name of the file or directory _with_ the extension.
 
-- **msg.file.name** _string_ \
-  The name of the file or directory _without_ the extension.
+    - **msg.file.name** _string_ \
+      The name of the file or directory _without_ the extension.
 
-- **msg.file.ext** _string_ \
-  The file extension, including the dot.
+    - **msg.file.ext** _string_ \
+      The file extension, including the dot.
 
-- **msg.file.data** _string | buffer_ \
-  The file content if the action was `Read`.
+    - **msg.file.data** _string | buffer_ \
+      The file content if the action was `Read`.
 
-- **msg.file.exists** _boolean_ \
-  The exists status of the file if the action was `Check Exists`.
+    - **msg.file.exists** _boolean_ \
+      The exists status of the file if the action was `Check Exists`.
 
-- **msg.file.stats** _object_ \
-  The Node.js `fs.Stats` object for the file (will be `null` if unavailable) if the action was `Get Stat`.
+    - **msg.file.stats** _object_ \
+      The Node.js `fs.Stats` object for the file (will be `null` if unavailable) if the action was `Get Stat`.
 </script>

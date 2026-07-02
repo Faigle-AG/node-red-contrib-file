@@ -5,7 +5,9 @@ module.exports = function (RED) {
     function FileReadNode(config) {
         RED.nodes.createNode(this, config);
         this.dynamic = config.dynamic;
-        this.action = config.action;
+        this.actionRead = config.actionRead;
+        this.actionExists = config.actionExists;
+        this.actionStat = config.actionStat;
         this.source = config.source;
         this.sourceType = config.sourceType || 'str';
 
@@ -13,15 +15,49 @@ module.exports = function (RED) {
 
         node.on('input', function (msg, send, done) {
             try {
-                const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
-                const sourcePathRaw = node.dynamic
-                    ? msg.file && msg.file.path
-                    : RED.util.evaluateNodeProperty(node.source, node.sourceType, node, msg);
+                let sourcePathRaw;
+                let runRead;
+                let runExists;
+                let runStat;
+
+                if (node.dynamic) {
+                    if (!msg.file || !msg.file.action)
+                        throw new Error('Dynamic action requested but msg.file.action is missing');
+                    if (!msg.file || !msg.file.path)
+                        throw new Error('Dynamic action requested but msg.file.path is missing');
+
+                    sourcePathRaw = msg.file.path;
+
+                    const act = msg.file.action;
+                    if (Array.isArray(act)) {
+                        runRead = act.includes('read');
+                        runExists = act.includes('exists');
+                        runStat = act.includes('stat');
+                    } else if (typeof act === 'string') {
+                        const actLower = act.toLowerCase();
+                        runRead = actLower.includes('read');
+                        runExists = actLower.includes('exists');
+                        runStat = actLower.includes('stat');
+                    } else if (typeof act === 'object') {
+                        runRead = !!act.read;
+                        runExists = !!act.exists;
+                        runStat = !!act.stat;
+                    }
+                } else {
+                    sourcePathRaw = RED.util.evaluateNodeProperty(
+                        node.source,
+                        node.sourceType,
+                        node,
+                        msg,
+                    );
+                    runRead = node.actionRead;
+                    runExists = node.actionExists;
+                    runStat = node.actionStat;
+                }
 
                 if (!sourcePathRaw) throw new Error('Source path is missing');
                 if (typeof sourcePathRaw !== 'string')
                     throw new Error('Source path must resolve to a string');
-                if (!currentAction) throw new Error('Action is missing');
 
                 const filename = path.normalize(sourcePathRaw);
                 const parsed = path.parse(filename);
@@ -35,52 +71,30 @@ module.exports = function (RED) {
                     ext: parsed.ext,
                 };
 
-                switch (currentAction) {
-                    case 'read':
-                        fs.readFile(filename, (err, data) => {
-                            if (err) return handleError(err);
-                            file.data = data;
-                            msg.file = { ...msg.file, ...file };
-                            finishAction(`Read ${file.base}`);
-                        });
-                        break;
-
-                    case 'exists':
-                        fs.access(filename, fs.constants.F_OK, (err) => {
-                            file.exists = !err;
-                            msg.file = { ...msg.file, ...file };
-                            finishAction(file.exists ? 'Exists' : 'Does not exist');
-                        });
-                        break;
-
-                    case 'stat':
-                        fs.stat(filename, (err, stats) => {
-                            if (err) return handleError(err);
-
-                            file.stats = stats;
-                            msg.file = { ...msg.file, ...file };
-                            finishAction(`Stat ${file.base}`);
-                        });
-                        break;
-
-                    default:
-                        throw new Error(`Unknown action type: ${currentAction}`);
+                let acts = [];
+                if (runRead) {
+                    file.data = fs.readFileSync(filename);
+                    acts.push('Read');
                 }
 
-                function finishAction(statusText) {
-                    node.status({ fill: 'green', shape: 'dot', text: statusText });
-                    send(msg);
-                    if (done) done();
-                    setTimeout(() => node.status({}), 5000);
+                if (runExists) {
+                    file.exists = fs.existsSync(filename);
+                    acts.push(file.exists ? 'Exists' : 'Not Found');
                 }
 
-                function handleError(err) {
-                    node.status({ fill: 'red', shape: 'dot', text: err.code || 'Error' });
-                    if (done) done(err);
-                    else node.error(err, msg);
+                if (runStat) {
+                    file.stats = fs.statSync(filename);
+                    acts.push('Stat');
                 }
+
+                msg.file = { ...msg.file, ...file };
+                node.status({ fill: 'green', shape: 'dot', text: acts.join(', ') });
+                send(msg);
+
+                if (done) done();
+                setTimeout(() => node.status({}), 5000);
             } catch (err) {
-                node.status({ fill: 'red', shape: 'dot', text: 'Configuration error' });
+                node.status({ fill: 'red', shape: 'dot', text: err.code || 'Configuration error' });
                 if (done) done(err);
                 else node.error(err, msg);
             }
