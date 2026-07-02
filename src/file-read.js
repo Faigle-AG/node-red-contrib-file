@@ -10,6 +10,8 @@ module.exports = function (RED) {
         this.actionStat = config.actionStat;
         this.source = config.source;
         this.sourceType = config.sourceType || 'str';
+        this.target = config.target || 'file';
+        this.targetType = config.targetType || 'msg';
 
         var node = this;
 
@@ -87,14 +89,37 @@ module.exports = function (RED) {
                     acts.push('Stat');
                 }
 
-                msg.file = { ...msg.file, ...file };
-                node.status({ fill: 'green', shape: 'dot', text: acts.join(', ') });
+                if (node.targetType === 'msg') {
+                    let currentTargetValue = RED.util.getMessageProperty(msg, node.target) || {};
+                    if (typeof currentTargetValue !== 'object' || currentTargetValue === null)
+                        currentTargetValue = {};
+                    RED.util.setMessageProperty(
+                        msg,
+                        node.target,
+                        { ...currentTargetValue, ...file },
+                        true,
+                    );
+                } else if (node.targetType === 'flow') node.context().flow.set(node.target, file);
+                else if (node.targetType === 'global') node.context().global.set(node.target, file);
+
+                if (acts.length > 0)
+                    node.status({ fill: 'green', shape: 'dot', text: acts.join(', ') });
+                else
+                    node.status({
+                        fill: 'yellow',
+                        shape: 'dot',
+                        text: 'Did nothing to the file...',
+                    });
                 send(msg);
 
                 if (done) done();
                 setTimeout(() => node.status({}), 5000);
             } catch (err) {
-                node.status({ fill: 'red', shape: 'dot', text: err.code || 'Configuration error' });
+                node.status({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: err.code || err.message || 'Configuration error',
+                });
                 if (done) done(err);
                 else node.error(err, msg);
             }

@@ -4,6 +4,15 @@
         color: 'burlywood',
         defaults: {
             name: { value: '' },
+            target: {
+                value: 'file',
+                validate: function (v) {
+                    if (!v || v.trim() === '') return true;
+                    var builtInValidator = RED.validators.typedInput('targetType');
+                    return builtInValidator.call(this, v);
+                },
+            },
+            targetType: { value: 'msg' },
             dynamic: { value: false },
             actionRead: { value: true },
             actionExists: { value: true },
@@ -44,6 +53,12 @@
                 default: 'str',
                 types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
                 typeField: $('#node-input-sourceType'),
+            });
+
+            $('#node-input-target').typedInput({
+                default: 'msg',
+                types: ['msg', 'flow', 'global'],
+                typeField: $('#node-input-targetType'),
             });
 
             $('#node-input-dynamic').on('change', function () {
@@ -158,6 +173,15 @@
             <input type="hidden" id="node-input-sourceType" />
         </div>
     </fieldset>
+
+    <div class="form-row">
+        <label for="node-input-target">
+            <i class="fa fa-arrow-right"></i>
+            <span>Target</span>
+        </label>
+        <input type="text" id="node-input-target" class="input-width-70" />
+        <input type="hidden" id="node-input-targetType" />
+    </div>
 </script>
 
 <!-- prettier-ignore -->
@@ -178,6 +202,9 @@ A node to read a file, check its existence, or retrieve its statistics.
 - **Source Path** _string | msg | flow | global | env | JSONata_ \
   The absolute path to the source file.
 
+- **Target** _msg | flow | global_ \
+      The target property where the complete file object (including path metadata, file content, existence status, and statistics) will be stored.
+
 ---
 
 ### Inputs used in dynamic mode
@@ -194,7 +221,7 @@ A node to read a file, check its existence, or retrieve its statistics.
 ### Outputs
 
 - **msg.file** _object_ \
-  The object containing the event details.
+  The object containing the event details if not changed by the **Target**.
 
 - **msg.file.filetype** _string_ \
   The type of item that triggered the event (`file`, `directory`).
