@@ -19,7 +19,8 @@ module.exports = function (RED) {
                     : RED.util.evaluateNodeProperty(node.source, node.sourceType, node, msg);
 
                 if (!sourcePathRaw) throw new Error('Source path is missing');
-
+                if (typeof sourcePathRaw !== 'string')
+                    throw new Error('Source path must resolve to a string');
                 if (!currentAction) throw new Error('Action is missing');
 
                 const filename = path.normalize(sourcePathRaw);
