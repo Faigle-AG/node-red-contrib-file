@@ -1,6 +1,6 @@
 {
   "name": "@faigle/node-red-contrib-file",
-  "version": "0.1.9",
+  "version": "0.1.11",
   "description": "somewhat improved file handlers",
   "keywords": [
     "node-red"
