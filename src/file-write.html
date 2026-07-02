@@ -34,7 +34,7 @@
             },
             targetType: { value: 'str' },
             data: {
-                value: 'payload',
+                value: 'file.data',
                 validate: function (v) {
                     if (
                         $('#node-input-dynamic').length
@@ -74,15 +74,8 @@
             });
 
             $('#node-input-dynamic').on('change', function () {
-                if ($(this).prop('checked')) {
-                    $('#row-action').hide();
-                    $('#row-target').hide();
-                    $('#row-data').hide();
-                } else {
-                    $('#row-action').show();
-                    $('#row-target').show();
-                    $('#row-data').show();
-                }
+                if ($(this).prop('checked')) $('#file-options-group').hide();
+                else $('#file-options-group').show();
 
                 $('#node-input-target').trigger('change');
                 $('#node-input-data').trigger('change');
@@ -93,60 +86,98 @@
     });
 </script>
 
+<style>
+    .flex-checkbox-row {
+        display: flex;
+        align-items: center;
+        padding-left: 104px;
+        margin-bottom: 12px;
+    }
+    .flex-checkbox-row input[type='checkbox'] {
+        width: auto !important;
+        margin: 0 8px 0 0 !important;
+    }
+    .flex-checkbox-row label {
+        width: auto !important;
+        margin: 0 !important;
+    }
+
+    fieldset.node-red-fieldset {
+        border: 1px solid var(--red-ui-form-input-border-color, #ccc) !important;
+        padding: 12px !important;
+        margin-bottom: 12px !important;
+        border-radius: 4px !important;
+    }
+
+    fieldset.node-red-fieldset legend {
+        border-bottom: none !important;
+        width: auto !important;
+        padding: 0 5px !important;
+        font-size: 13px !important;
+        font-weight: bold !important;
+        color: var(--red-ui-primary-text-color, #555) !important;
+        margin-bottom: 0 !important;
+    }
+
+    .input-width-70 {
+        width: 70% !important;
+    }
+</style>
+
 <script type="text/html" data-template-name="file-write">
     <div class="form-row">
         <label for="node-input-name">
             <i class="fa fa-tag"></i>
             <span>Name</span>
         </label>
-        <input type="text" id="node-input-name" placeholder="Name" />
+        <input type="text" id="node-input-name" placeholder="Name" class="input-width-70" />
     </div>
-    <div class="form-row">
-        <label for="node-input-dynamic">&nbsp;</label>
-        <input
-            type="checkbox"
-            id="node-input-dynamic"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-dynamic" style="width: 70%;">
+
+    <div class="form-row flex-checkbox-row">
+        <input type="checkbox" id="node-input-dynamic" class="input-width-70" />
+        <label for="node-input-dynamic">
             <i class="fa fa-usb"></i>
             Load from msg.file
         </label>
     </div>
-    <div class="form-row" id="row-action">
-        <label for="node-input-action">
-            <i class="fa fa-tasks"></i>
-            Action
-        </label>
-        <select id="node-input-action" style="width: 70%">
-            <option value="write">Write (Overwrite)</option>
-            <option value="append">Append</option>
-        </select>
-    </div>
-    <div class="form-row" id="row-target">
-        <label for="node-input-target">
-            <i class="fa fa-file"></i>
-            Target Path
-        </label>
-        <input type="text" id="node-input-target" />
-        <input type="hidden" id="node-input-targetType" />
-    </div>
-    <div class="form-row" id="row-data">
-        <label for="node-input-data">
-            <i class="fa fa-envelope"></i>
-            Data
-        </label>
-        <input type="text" id="node-input-data" />
-        <input type="hidden" id="node-input-dataType" />
-    </div>
-    <div class="form-row">
+
+    <fieldset id="file-options-group" class="node-red-fieldset">
+        <legend>File Options</legend>
+
+        <div class="form-row" id="row-action">
+            <label for="node-input-action">
+                <i class="fa fa-tasks"></i>
+                Action
+            </label>
+            <select id="node-input-action" style="width: 70%">
+                <option value="write">Write (Overwrite)</option>
+                <option value="append">Append</option>
+            </select>
+        </div>
+
+        <div class="form-row" id="row-target">
+            <label for="node-input-target">
+                <i class="fa fa-file"></i>
+                Target Path
+            </label>
+            <input type="text" id="node-input-target" />
+            <input type="hidden" id="node-input-targetType" />
+        </div>
+
+        <div class="form-row" id="row-data">
+            <label for="node-input-data">
+                <i class="fa fa-envelope"></i>
+                Data
+            </label>
+            <input type="text" id="node-input-data" />
+            <input type="hidden" id="node-input-dataType" />
+        </div>
+    </fieldset>
+
+    <div class="form-row flex-checkbox-row">
+        <input type="checkbox" id="node-input-createDir" class="input-width-70" />
         <label for="node-input-createDir">&nbsp;</label>
-        <input
-            type="checkbox"
-            id="node-input-createDir"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-createDir" style="width: auto">
+        <label for="node-input-createDir">
             <i class="fa fa-plus"></i>
             Create target directory
         </label>

@@ -97,21 +97,54 @@
             });
 
             $('#node-input-dynamic').on('change', function () {
-                if ($(this).prop('checked')) {
-                    $('#row-action').hide();
-                    $('#row-source').hide();
-                    $('#row-destination').hide();
-                    $('#row-createDir').hide();
-                } else {
-                    $('#row-action').show();
-                    $('#node-input-action').trigger('change');
-                }
+                if ($(this).prop('checked')) $('#file-options-group').hide();
+                else $('#file-options-group').show();
+
+                $('#node-input-action').trigger('change');
             });
 
             $('#node-input-dynamic').trigger('change');
         },
     });
 </script>
+
+<style>
+    .flex-checkbox-row {
+        display: flex;
+        align-items: center;
+        padding-left: 104px;
+        margin-bottom: 12px;
+    }
+    .flex-checkbox-row input[type='checkbox'] {
+        width: auto !important;
+        margin: 0 8px 0 0 !important;
+    }
+    .flex-checkbox-row label {
+        width: auto !important;
+        margin: 0 !important;
+    }
+
+    fieldset.node-red-fieldset {
+        border: 1px solid var(--red-ui-form-input-border-color, #ccc) !important;
+        padding: 12px !important;
+        margin-bottom: 12px !important;
+        border-radius: 4px !important;
+    }
+
+    fieldset.node-red-fieldset legend {
+        border-bottom: none !important;
+        width: auto !important;
+        padding: 0 5px !important;
+        font-size: 13px !important;
+        font-weight: bold !important;
+        color: var(--red-ui-primary-text-color, #555) !important;
+        margin-bottom: 0 !important;
+    }
+
+    .input-width-70 {
+        width: 70% !important;
+    }
+</style>
 
 <script type="text/html" data-template-name="file-transfer">
     <div class="form-row">
@@ -121,45 +154,47 @@
         </label>
         <input type="text" id="node-input-name" placeholder="Name" />
     </div>
-    <div class="form-row">
-        <label for="node-input-dynamic">&nbsp;</label>
-        <input
-            type="checkbox"
-            id="node-input-dynamic"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-dynamic" style="width: 70%;">
+
+    <div class="form-row flex-checkbox-row">
+        <input type="checkbox" id="node-input-dynamic" class="input-width-70" />
+        <label for="node-input-dynamic">
             <i class="fa fa-usb"></i>
             Load from msg.file
         </label>
     </div>
-    <div class="form-row" id="row-action">
-        <label for="node-input-action">
-            <i class="fa fa-tasks"></i>
-            Action
-        </label>
-        <select id="node-input-action" style="width: 70%">
-            <option value="move">Move / Rename</option>
-            <option value="copy">Copy</option>
-            <option value="delete">Delete</option>
-        </select>
-    </div>
-    <div class="form-row" id="row-source">
-        <label for="node-input-source">
-            <i class="fa fa-file"></i>
-            Source
-        </label>
-        <input type="text" id="node-input-source" />
-        <input type="hidden" id="node-input-sourceType" />
-    </div>
-    <div class="form-row" id="row-destination">
-        <label for="node-input-destination">
-            <i class="fa fa-folder-open"></i>
-            Destination
-        </label>
-        <input type="text" id="node-input-destination" />
-        <input type="hidden" id="node-input-destinationType" />
-    </div>
+
+    <fieldset id="file-options-group" class="node-red-fieldset">
+        <legend>File Options</legend>
+
+        <div class="form-row" id="row-action">
+            <label for="node-input-action">
+                <i class="fa fa-tasks"></i>
+                Action
+            </label>
+            <select id="node-input-action" style="width: 70%">
+                <option value="move">Move / Rename</option>
+                <option value="copy">Copy</option>
+                <option value="delete">Delete</option>
+            </select>
+        </div>
+        <div class="form-row" id="row-source">
+            <label for="node-input-source">
+                <i class="fa fa-file"></i>
+                Source
+            </label>
+            <input type="text" id="node-input-source" />
+            <input type="hidden" id="node-input-sourceType" />
+        </div>
+        <div class="form-row" id="row-destination">
+            <label for="node-input-destination">
+                <i class="fa fa-folder-open"></i>
+                Destination
+            </label>
+            <input type="text" id="node-input-destination" />
+            <input type="hidden" id="node-input-destinationType" />
+        </div>
+    </fieldset>
+
     <div class="form-row" id="row-createDir">
         <label for="node-input-createDir">&nbsp;</label>
         <input
