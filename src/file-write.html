@@ -184,6 +184,7 @@
     </div>
 </script>
 
+<!-- @formatter:off -->
 <!-- prettier-ignore -->
 <script type="text/markdown" data-help-name="file-write">
 A node to write or append data to a file on the file system.
@@ -212,35 +213,36 @@ A node to write or append data to a file on the file system.
 - **msg.file** _object_ \
   The incoming message triggers the operation.
 
-- **msg.file.action** _string_ \
-  The action to execute if triggered dynamically (`write` or `append`).
+  - **msg.file.action** _string_ \
+    The action to execute if triggered dynamically (`write` or `append`).
 
-- **msg.file.path** _string_ \
-  The destination file path to write to.
+  - **msg.file.path** _string_ \
+    The destination file path to write to.
 
-- **msg.file.data** _string | buffer | object_ \
-  The data to write. Objects will be automatically stringified.
+  - **msg.file.data** _string | buffer | object_ \
+    The data to write. Objects will be automatically stringified.
 
 ### Outputs
 
 - **msg.file** _object_ \
   The object containing the event details.
 
-- **msg.file.filetype** _string_ \
-  The type of item that triggered the event (`file`).
+  - **msg.file.filetype** _string_ \
+    The type of item that triggered the event (`file`).
 
-- **msg.file.path** _string_ \
-  The complete, normalized "absolute" path to the item.
+  - **msg.file.path** _string_ \
+    The complete, normalized "absolute" path to the item.
 
-- **msg.file.dir** _string_ \
-  The "absolute" path to the parent directory containing the item.
+  - **msg.file.dir** _string_ \
+    The "absolute" path to the parent directory containing the item.
 
-- **msg.file.base** _string_ \
-  The name of the file _with_ the extension.
+  - **msg.file.base** _string_ \
+    The name of the file _with_ the extension.
 
-- **msg.file.name** _string_ \
-  The name of the file _without_ the extension.
+  - **msg.file.name** _string_ \
+    The name of the file _without_ the extension.
 
-- **msg.file.ext** _string_ \
-  The file extension, including the dot.
+  - **msg.file.ext** _string_ \
+    The file extension, including the dot.
 </script>
+<!-- @formatter:on -->
