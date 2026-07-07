@@ -1,6 +1,7 @@
 module.exports = function (RED) {
     const fs = require('fs');
     const path = require('path');
+    const { extendNode } = require('@faigle/node-red-runtime-utils')(RED);
 
     function FileReadNode(config) {
         RED.nodes.createNode(this, config);
@@ -14,8 +15,9 @@ module.exports = function (RED) {
         this.targetType = config.targetType || 'msg';
 
         var node = this;
+        extendNode(node);
 
-        node.on('input', function (msg, send, done) {
+        node.on('input', async function (msg, send, done) {
             try {
                 let sourcePathRaw;
                 let runRead;
@@ -46,12 +48,7 @@ module.exports = function (RED) {
                         runStat = !!act.stat;
                     }
                 } else {
-                    sourcePathRaw = RED.util.evaluateNodeProperty(
-                        node.source,
-                        node.sourceType,
-                        node,
-                        msg,
-                    );
+                    sourcePathRaw = await node.getTypedProperty(node.source, node.sourceType, msg);
                     runRead = node.actionRead;
                     runExists = node.actionExists;
                     runStat = node.actionStat;
@@ -89,37 +86,44 @@ module.exports = function (RED) {
                     acts.push('Stat');
                 }
 
-                if (node.targetType === 'msg') {
-                    let currentTargetValue = RED.util.getMessageProperty(msg, node.target) || {};
-                    if (typeof currentTargetValue !== 'object' || currentTargetValue === null)
-                        currentTargetValue = {};
-                    RED.util.setMessageProperty(
-                        msg,
-                        node.target,
-                        { ...currentTargetValue, ...file },
-                        true,
-                    );
-                } else if (node.targetType === 'flow') node.context().flow.set(node.target, file);
-                else if (node.targetType === 'global') node.context().global.set(node.target, file);
+                let currentTargetValue = RED.util.getMessageProperty(msg, node.target) || {};
+                await node.setTypedProperty(msg, node.target, node.targetType, {
+                    ...currentTargetValue,
+                    ...file,
+                });
+                //                if (node.targetType === 'msg') {
+                //                    let currentTargetValue = RED.util.getMessageProperty(msg, node.target) || {};
+                //                    if (typeof currentTargetValue !== 'object' || currentTargetValue === null)
+                //                        currentTargetValue = {};
+                //                    RED.util.setMessageProperty(
+                //                        msg,
+                //                        node.target,
+                //                        {...currentTargetValue, ...file},
+                //                        true,
+                //                    );
+                //                } else if (node.targetType === 'flow') node.context().flow.set(node.target, file);
+                //                else if (node.targetType === 'global') node.context().global.set(node.target, file);
 
                 if (acts.length > 0)
-                    node.status({ fill: 'green', shape: 'dot', text: acts.join(', ') });
-                else
-                    node.status({
-                        fill: 'yellow',
-                        shape: 'dot',
-                        text: 'Did nothing to the file...',
-                    });
+                    //                    node.status({fill: 'green', shape: 'dot', text: acts.join(', ')});
+                    node.status.succeeded(acts.join(', '));
+                else node.status.info('Did nothing to the file...');
+                //                    node.status({
+                //                        fill : 'yellow',
+                //                        shape: 'dot',
+                //                        text : 'Did nothing to the file...',
+                //                    });
                 send(msg);
 
                 if (done) done();
-                setTimeout(() => node.status({}), 5000);
+                //                setTimeout(() => node.status({}), 5000);
             } catch (err) {
-                node.status({
-                    fill: 'red',
-                    shape: 'dot',
-                    text: err.code || err.message || 'Configuration error',
-                });
+                node.status.failed(err.code || err.message || 'Configuration error');
+                //                node.status({
+                //                    fill : 'red',
+                //                    shape: 'dot',
+                //                    text : err.code || err.message || 'Configuration error',
+                //                });
                 if (done) done(err);
                 else node.error(err, msg);
             }

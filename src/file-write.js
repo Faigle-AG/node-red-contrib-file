@@ -1,6 +1,7 @@
 module.exports = function (RED) {
     const fs = require('fs');
     const path = require('path');
+    const { extendNode } = require('@faigle/node-red-runtime-utils')(RED);
 
     function FileWriteNode(config) {
         RED.nodes.createNode(this, config);
@@ -14,21 +15,20 @@ module.exports = function (RED) {
         this.createDir = config.createDir;
 
         var node = this;
+        extendNode(node);
 
-        node.on('input', function (msg, send, done) {
+        node.on('input', async function (msg, send, done) {
             try {
                 const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
                 const targetPathRaw = node.dynamic
                     ? msg.file && msg.file.path
-                    : RED.util.evaluateNodeProperty(node.target, node.targetType, node, msg);
+                    : await node.getTypedProperty(node.target, node.targetType, msg);
                 const fileData = node.dynamic
                     ? msg.file && msg.file.data
-                    : RED.util.evaluateNodeProperty(node.data, node.dataType, node, msg);
+                    : await node.getTypedProperty(node.data, node.dataType, msg);
 
                 if (!targetPathRaw) throw new Error('Target path is missing');
-
                 if (!currentAction) throw new Error('Action is missing');
-
                 if (fileData === undefined) throw new Error('Data to write is undefined');
 
                 const targetPath = path.normalize(targetPathRaw);
@@ -74,19 +74,18 @@ module.exports = function (RED) {
                 }
 
                 function finishAction(statusText) {
-                    node.status({ fill: 'green', shape: 'dot', text: statusText });
+                    node.status.succeeded(statusText);
                     send(msg);
                     if (done) done();
-                    setTimeout(() => node.status({}), 5000);
                 }
 
                 function handleError(err) {
-                    node.status({ fill: 'red', shape: 'dot', text: err.code || 'Error' });
+                    node.status.failed(err.code || 'Error');
                     if (done) done(err);
                     else node.error(err, msg);
                 }
             } catch (err) {
-                node.status({ fill: 'red', shape: 'dot', text: 'Configuration error' });
+                node.status.failed('Configuration error');
                 if (done) done(err);
                 else node.error(err, msg);
             }

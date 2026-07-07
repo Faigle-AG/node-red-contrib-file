@@ -1,6 +1,7 @@
 module.exports = function (RED) {
     const fs = require('fs');
     const path = require('path');
+    const { extendNode } = require('@faigle/node-red-runtime-utils')(RED);
 
     function FileTransferNode(config) {
         RED.nodes.createNode(this, config);
@@ -14,24 +15,28 @@ module.exports = function (RED) {
         this.createDir = config.createDir;
 
         var node = this;
+        extendNode(node);
 
-        node.on('input', function (msg, send, done) {
+        node.on('input', async function (msg, send, done) {
             try {
+                /*                function evaluateNodeProperty(value, type, node, msg) {
+                    return new Promise((resolve, reject) => {
+                        RED.util.evaluateNodeProperty(value, type, node, msg, (err, result) => {
+                            if (err) reject(err);
+                            else resolve(result);
+                        });
+                    });
+                }*/
+
                 const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
                 const srcRaw = node.dynamic
                     ? msg.file && msg.file.source
-                    : RED.util.evaluateNodeProperty(node.source, node.sourceType, node, msg);
+                    : await node.getTypedProperty(node.source, node.sourceType, msg);
                 const destRaw = node.dynamic
                     ? msg.file && msg.file.destination
-                    : RED.util.evaluateNodeProperty(
-                          node.destination,
-                          node.destinationType,
-                          node,
-                          msg,
-                      );
+                    : await node.getTypedProperty(node.destination, node.destinationType, msg);
 
                 if (!currentAction) throw new Error('Action is missing');
-
                 if (!srcRaw) throw new Error('Source path is missing');
 
                 const srcPath = path.normalize(srcRaw);
@@ -54,9 +59,7 @@ module.exports = function (RED) {
                     }
 
                     parsed = path.parse(destPath);
-                } else {
-                    parsed = path.parse(srcPath);
-                }
+                } else parsed = path.parse(srcPath);
 
                 var file = {
                     filetype: 'file',
@@ -117,20 +120,19 @@ module.exports = function (RED) {
                         throw new Error(`Unknown action type: ${currentAction}`);
                 }
 
-                function finishAction(statusText /*, sPath, dPath*/) {
-                    node.status({ fill: 'green', shape: 'dot', text: statusText });
+                function finishAction(statusText) {
+                    node.status.succeeded(statusText);
                     send(msg);
                     if (done) done();
-                    setTimeout(() => node.status({}), 5000);
                 }
 
                 function handleError(err) {
-                    node.status({ fill: 'red', shape: 'dot', text: err.code || 'Error' });
+                    node.status.failed(err.code || 'Error');
                     if (done) done(err);
                     else node.error(err, msg);
                 }
             } catch (err) {
-                node.status({ fill: 'red', shape: 'dot', text: 'Configuration error' });
+                node.status.failed('Configuration error');
                 if (done) done(err);
                 else node.error(err, msg);
             }
