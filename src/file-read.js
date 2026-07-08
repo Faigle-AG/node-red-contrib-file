@@ -86,44 +86,21 @@ module.exports = function (RED) {
                     acts.push('Stat');
                 }
 
-                let currentTargetValue = RED.util.getMessageProperty(msg, node.target) || {};
-                await node.setTypedProperty(msg, node.target, node.targetType, {
+                let currentTargetValue =
+                    (await node.getTypedProperty(node.target, node.targetType, msg)) || {};
+                await node.setTypedProperty(node.target, node.targetType, msg, {
                     ...currentTargetValue,
                     ...file,
                 });
-                //                if (node.targetType === 'msg') {
-                //                    let currentTargetValue = RED.util.getMessageProperty(msg, node.target) || {};
-                //                    if (typeof currentTargetValue !== 'object' || currentTargetValue === null)
-                //                        currentTargetValue = {};
-                //                    RED.util.setMessageProperty(
-                //                        msg,
-                //                        node.target,
-                //                        {...currentTargetValue, ...file},
-                //                        true,
-                //                    );
-                //                } else if (node.targetType === 'flow') node.context().flow.set(node.target, file);
-                //                else if (node.targetType === 'global') node.context().global.set(node.target, file);
 
-                if (acts.length > 0)
-                    //                    node.status({fill: 'green', shape: 'dot', text: acts.join(', ')});
-                    node.status.succeeded(acts.join(', '));
+                if (acts.length > 0) node.status.succeeded(acts.join(', '));
                 else node.status.info('Did nothing to the file...');
-                //                    node.status({
-                //                        fill : 'yellow',
-                //                        shape: 'dot',
-                //                        text : 'Did nothing to the file...',
-                //                    });
+
                 send(msg);
 
                 if (done) done();
-                //                setTimeout(() => node.status({}), 5000);
             } catch (err) {
                 node.status.failed(err.code || err.message || 'Configuration error');
-                //                node.status({
-                //                    fill : 'red',
-                //                    shape: 'dot',
-                //                    text : err.code || err.message || 'Configuration error',
-                //                });
                 if (done) done(err);
                 else node.error(err, msg);
             }

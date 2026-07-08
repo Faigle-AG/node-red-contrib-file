@@ -19,15 +19,6 @@ module.exports = function (RED) {
 
         node.on('input', async function (msg, send, done) {
             try {
-                /*                function evaluateNodeProperty(value, type, node, msg) {
-                    return new Promise((resolve, reject) => {
-                        RED.util.evaluateNodeProperty(value, type, node, msg, (err, result) => {
-                            if (err) reject(err);
-                            else resolve(result);
-                        });
-                    });
-                }*/
-
                 const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
                 const srcRaw = node.dynamic
                     ? msg.file && msg.file.source
