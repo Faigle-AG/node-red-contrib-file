@@ -1,6 +1,6 @@
 {
   "name": "@faigle/node-red-contrib-file",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "description": "somewhat improved file handlers",
   "keywords": [
     "node-red"
@@ -32,7 +32,7 @@
     "should": "^13.2.3"
   },
   "dependencies": {
-    "@faigle/node-red-runtime-utils": "^0.6.0"
+    "@faigle/node-red-runtime-utils": "^0.6.3"
   },
   "scripts": {
     "prepare": "npx --yes husky",

@@ -96,7 +96,7 @@ module.exports = function (RED) {
                         break;
 
                     case 'delete':
-                        if (destRaw) node.log(`Destination Path ${destPath} will be ignored`);
+                        if (destRaw) node.log(`Destination Path ${destRaw} will be ignored`);
 
                         fs.unlink(srcPath, (err) => {
                             if (err) return handleError(err);
