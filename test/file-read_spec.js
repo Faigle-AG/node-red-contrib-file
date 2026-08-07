@@ -26,6 +26,29 @@ describe('file-read node', function () {
         helper.stopServer(done);
     });
 
+    it('loads with configured properties async', async function () {
+        const flow = [
+            {
+                id: 'n1',
+                type: 'file-read',
+                name: 'read test file',
+                dynamic: false,
+                actionRead: true,
+                actionExists: false,
+                actionStat: false,
+                source: INPUT_FILE,
+                sourceType: 'str',
+            },
+        ];
+
+        await helper.load(fileReadNode, flow);
+
+        const n1 = helper.getNode('n1');
+
+        n1.should.have.property('name', 'read test file');
+        n1.should.have.property('actionRead', true);
+    });
+
     it('loads with configured properties', function (done) {
         const flow = [
             {

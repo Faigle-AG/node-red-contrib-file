@@ -23,4 +23,11 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run lint
+
+    - name: Show environment
+      run: |
+        node -v
+        npm -v
+        npm ls node-red node-red-node-test-helper @faigle/node-red-runtime-utils
+
     - run: npm test
