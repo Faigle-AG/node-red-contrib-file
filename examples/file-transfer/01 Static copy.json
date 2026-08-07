@@ -1,0 +1,55 @@
+[
+  {
+    "id": "t1001",
+    "type": "inject",
+    "name": "Copy settings.js",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 180,
+    "y": 120,
+    "wires": [
+      [
+        "t1002"
+      ]
+    ]
+  },
+  {
+    "id": "t1002",
+    "type": "file-transfer",
+    "name": "Copy settings.js",
+    "dynamic": false,
+    "action": "copy",
+    "source": "./settings.js",
+    "sourceType": "str",
+    "destination": "./test/data/settings-copy.js",
+    "destinationType": "str",
+    "createDir": true,
+    "x": 410,
+    "y": 120,
+    "wires": [
+      [
+        "t1003"
+      ]
+    ]
+  },
+  {
+    "id": "t1003",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 620,
+    "y": 120,
+    "wires": []
+  }
+]

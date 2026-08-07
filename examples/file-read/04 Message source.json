@@ -1,0 +1,62 @@
+[
+  {
+    "id": "a4001",
+    "type": "inject",
+    "name": "Set msg.filename",
+    "props": [
+      {
+        "p": "filename",
+        "v": "./settings.js",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 190,
+    "y": 120,
+    "wires": [
+      [
+        "a4002"
+      ]
+    ]
+  },
+  {
+    "id": "a4002",
+    "type": "file-read",
+    "name": "Read path from msg.filename",
+    "target": "file",
+    "targetType": "msg",
+    "dynamic": false,
+    "actionRead": true,
+    "actionExists": true,
+    "actionStat": true,
+    "source": "filename",
+    "sourceType": "msg",
+    "x": 440,
+    "y": 120,
+    "wires": [
+      [
+        "a4003"
+      ]
+    ]
+  },
+  {
+    "id": "a4003",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 680,
+    "y": 120,
+    "wires": []
+  }
+]

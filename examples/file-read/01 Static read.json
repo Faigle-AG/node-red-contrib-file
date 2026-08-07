@@ -1,0 +1,56 @@
+[
+  {
+    "id": "a1001",
+    "type": "inject",
+    "name": "Read settings.js",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 200,
+    "y": 120,
+    "wires": [
+      [
+        "a1002"
+      ]
+    ]
+  },
+  {
+    "id": "a1002",
+    "type": "file-read",
+    "name": "Read settings.js",
+    "target": "file",
+    "targetType": "msg",
+    "dynamic": false,
+    "actionRead": true,
+    "actionExists": true,
+    "actionStat": true,
+    "source": "./settings.js",
+    "sourceType": "str",
+    "x": 400,
+    "y": 120,
+    "wires": [
+      [
+        "a1003"
+      ]
+    ]
+  },
+  {
+    "id": "a1003",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 590,
+    "y": 120,
+    "wires": []
+  }
+]

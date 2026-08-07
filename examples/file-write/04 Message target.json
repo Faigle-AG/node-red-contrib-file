@@ -1,0 +1,66 @@
+[
+  {
+    "id": "w4001",
+    "type": "inject",
+    "name": "Set filename + payload",
+    "props": [
+      {
+        "p": "filename",
+        "v": "./test/data/from-message.txt",
+        "vt": "str"
+      },
+      {
+        "p": "payload",
+        "v": "Target path came from msg.filename",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 190,
+    "y": 120,
+    "wires": [
+      [
+        "w4002"
+      ]
+    ]
+  },
+  {
+    "id": "w4002",
+    "type": "file-write",
+    "name": "Write path from msg.filename",
+    "dynamic": false,
+    "action": "write",
+    "target": "filename",
+    "targetType": "msg",
+    "data": "payload",
+    "dataType": "msg",
+    "createDir": true,
+    "x": 450,
+    "y": 120,
+    "wires": [
+      [
+        "w4003"
+      ]
+    ]
+  },
+  {
+    "id": "w4003",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 680,
+    "y": 120,
+    "wires": []
+  }
+]

@@ -1,0 +1,61 @@
+[
+  {
+    "id": "w1001",
+    "type": "inject",
+    "name": "Write hello.txt",
+    "props": [
+      {
+        "p": "payload",
+        "v": "Hello from Node-RED!",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 180,
+    "y": 120,
+    "wires": [
+      [
+        "w1002"
+      ]
+    ]
+  },
+  {
+    "id": "w1002",
+    "type": "file-write",
+    "name": "Write hello.txt",
+    "dynamic": false,
+    "action": "write",
+    "target": "./test/data/hello.txt",
+    "targetType": "str",
+    "data": "payload",
+    "dataType": "msg",
+    "createDir": true,
+    "x": 400,
+    "y": 120,
+    "wires": [
+      [
+        "w1003"
+      ]
+    ]
+  },
+  {
+    "id": "w1003",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 600,
+    "y": 120,
+    "wires": []
+  }
+]

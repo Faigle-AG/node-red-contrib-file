@@ -1,0 +1,110 @@
+[
+  {
+    "id": "a2001",
+    "type": "inject",
+    "name": "Read + exists",
+    "props": [
+      {
+        "p": "file",
+        "v": "{\"action\":[\"read\",\"exists\"],\"path\":\"./settings.js\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 180,
+    "y": 80,
+    "wires": [
+      [
+        "a2004"
+      ]
+    ]
+  },
+  {
+    "id": "a2002",
+    "type": "inject",
+    "name": "Get stat",
+    "props": [
+      {
+        "p": "file",
+        "v": "{\"action\":\"stat\",\"path\":\"./settings.js\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 160,
+    "y": 140,
+    "wires": [
+      [
+        "a2004"
+      ]
+    ]
+  },
+  {
+    "id": "a2003",
+    "type": "inject",
+    "name": "Check missing file",
+    "props": [
+      {
+        "p": "file",
+        "v": "{\"action\":\"exists\",\"path\":\"./does-not-exist.txt\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 190,
+    "y": 200,
+    "wires": [
+      [
+        "a2004"
+      ]
+    ]
+  },
+  {
+    "id": "a2004",
+    "type": "file-read",
+    "name": "Dynamic file operation",
+    "target": "file",
+    "targetType": "msg",
+    "dynamic": true,
+    "actionRead": false,
+    "actionExists": false,
+    "actionStat": false,
+    "source": "",
+    "sourceType": "str",
+    "x": 440,
+    "y": 140,
+    "wires": [
+      [
+        "a2005"
+      ]
+    ]
+  },
+  {
+    "id": "a2005",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 650,
+    "y": 140,
+    "wires": []
+  }
+]

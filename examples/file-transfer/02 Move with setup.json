@@ -1,0 +1,80 @@
+[
+  {
+    "id": "t2001",
+    "type": "inject",
+    "name": "Create source file",
+    "props": [
+      {
+        "p": "payload",
+        "v": "Temporary file to move",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 180,
+    "y": 120,
+    "wires": [
+      [
+        "t2002"
+      ]
+    ]
+  },
+  {
+    "id": "t2002",
+    "type": "file-write",
+    "name": "Create move-source.txt",
+    "dynamic": false,
+    "action": "write",
+    "target": "./test/data/move-source.txt",
+    "targetType": "str",
+    "data": "payload",
+    "dataType": "msg",
+    "createDir": true,
+    "x": 420,
+    "y": 120,
+    "wires": [
+      [
+        "t2003"
+      ]
+    ]
+  },
+  {
+    "id": "t2003",
+    "type": "file-transfer",
+    "name": "Move file",
+    "dynamic": false,
+    "action": "move",
+    "source": "./test/data/move-source.txt",
+    "sourceType": "str",
+    "destination": "./test/data/archive/moved.txt",
+    "destinationType": "str",
+    "createDir": true,
+    "x": 640,
+    "y": 120,
+    "wires": [
+      [
+        "t2004"
+      ]
+    ]
+  },
+  {
+    "id": "t2004",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 840,
+    "y": 120,
+    "wires": []
+  }
+]

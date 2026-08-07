@@ -1,0 +1,72 @@
+[
+    {
+        "id": "w2001",
+        "type": "inject",
+        "z": "c9c0e06e4d779068",
+        "name": "Append log line",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "payload": "$now() & \" - New log entry\\n\"",
+        "payloadType": "jsonata",
+        "x": 300,
+        "y": 1020,
+        "wires": [
+            [
+                "w2002"
+            ]
+        ]
+    },
+    {
+        "id": "w2002",
+        "type": "file-write",
+        "z": "c9c0e06e4d779068",
+        "name": "Append application.log",
+        "dynamic": false,
+        "action": "append",
+        "target": "./test/data/application.log",
+        "targetType": "str",
+        "data": "payload",
+        "dataType": "msg",
+        "createDir": true,
+        "x": 540,
+        "y": 1020,
+        "wires": [
+            [
+                "w2003"
+            ]
+        ]
+    },
+    {
+        "id": "w2003",
+        "type": "debug",
+        "z": "c9c0e06e4d779068",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "2a2710dd28e21150",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@faigle/node-red-contrib-file": "0.2.5"
+        }
+    }
+]

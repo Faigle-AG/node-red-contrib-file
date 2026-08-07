@@ -1,0 +1,109 @@
+[
+  {
+    "id": "t3001",
+    "type": "inject",
+    "name": "Dynamic copy",
+    "props": [
+      {
+        "p": "file",
+        "v": "{\"action\":\"copy\",\"source\":\"./settings.js\",\"destination\":\"./test/data/dynamic-copy.js\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 170,
+    "y": 80,
+    "wires": [
+      [
+        "t3004"
+      ]
+    ]
+  },
+  {
+    "id": "t3002",
+    "type": "inject",
+    "name": "Dynamic move",
+    "props": [
+      {
+        "p": "file",
+        "v": "{\"action\":\"move\",\"source\":\"./test/data/dynamic-copy.js\",\"destination\":\"./test/data/archive/dynamic-copy.js\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 170,
+    "y": 140,
+    "wires": [
+      [
+        "t3004"
+      ]
+    ]
+  },
+  {
+    "id": "t3003",
+    "type": "inject",
+    "name": "Dynamic delete",
+    "props": [
+      {
+        "p": "file",
+        "v": "{\"action\":\"delete\",\"source\":\"./test/data/archive/dynamic-copy.js\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 170,
+    "y": 200,
+    "wires": [
+      [
+        "t3004"
+      ]
+    ]
+  },
+  {
+    "id": "t3004",
+    "type": "file-transfer",
+    "name": "Dynamic file transfer",
+    "dynamic": true,
+    "action": "move",
+    "source": "",
+    "sourceType": "str",
+    "destination": "",
+    "destinationType": "str",
+    "createDir": true,
+    "x": 430,
+    "y": 140,
+    "wires": [
+      [
+        "t3005"
+      ]
+    ]
+  },
+  {
+    "id": "t3005",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 650,
+    "y": 140,
+    "wires": []
+  }
+]

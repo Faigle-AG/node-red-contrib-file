@@ -1,0 +1,66 @@
+[
+  {
+    "id": "t4001",
+    "type": "inject",
+    "name": "Set source + destination",
+    "props": [
+      {
+        "p": "sourcePath",
+        "v": "./settings.js",
+        "vt": "str"
+      },
+      {
+        "p": "destinationPath",
+        "v": "./test/data/from-message.js",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 5,
+    "topic": "",
+    "x": 190,
+    "y": 120,
+    "wires": [
+      [
+        "t4002"
+      ]
+    ]
+  },
+  {
+    "id": "t4002",
+    "type": "file-transfer",
+    "name": "Copy paths from msg",
+    "dynamic": false,
+    "action": "copy",
+    "source": "sourcePath",
+    "sourceType": "msg",
+    "destination": "destinationPath",
+    "destinationType": "msg",
+    "createDir": true,
+    "x": 440,
+    "y": 120,
+    "wires": [
+      [
+        "t4003"
+      ]
+    ]
+  },
+  {
+    "id": "t4003",
+    "type": "debug",
+    "name": "msg.file",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "file",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 650,
+    "y": 120,
+    "wires": []
+  }
+]
