@@ -57,7 +57,7 @@
         label: function () {
             return (
                 this.name ||
-                (!this.dynamic ? (this.action + ' ' + this.source).trim() : 'file-write')
+                (!this.dynamic ? (this.action + ' ' + this.target).trim() : 'file-write')
             );
         },
         oneditprepare: function () {
@@ -178,10 +178,10 @@ A node to write or append data to a file on the file system.
 - **Load from msg.file** _boolean_ \
   If enabled, the node will ignore the UI properties and expect `msg.file.action`, `msg.file.path`, and `msg.file.data` to be provided dynamically.
 
-- **Action** _dropdown_ \
+- **Action** _radio buttons_ \
   Select whether to write (overwrite) the file or append data to the end of it.
 
-- **Target Path** _string | msg_ \
+- **Destination Path** _string | msg | flow | global | env | JSONata_ \
   The absolute path to the destination file.
 
 - **Data** _string | msg_ \
