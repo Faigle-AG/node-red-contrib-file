@@ -1,6 +1,6 @@
 {
   "name": "@faigle/node-red-contrib-file",
-  "version": "0.1.17",
+  "version": "0.2.1",
   "description": "somewhat improved file handlers",
   "keywords": [
     "node-red"
@@ -32,11 +32,8 @@
     "should": "^13.2.3"
   },
   "dependencies": {
-    "@faigle/node-red-runtime-utils": "^0.4.2"
+    "@faigle/node-red-runtime-utils": "^0.6.3"
   },
-  "workspaces": [
-    "../../node-red-runtime/*"
-  ],
   "scripts": {
     "prepare": "npx --yes husky",
     "test": "mocha \"test/**/*_spec.js\"",

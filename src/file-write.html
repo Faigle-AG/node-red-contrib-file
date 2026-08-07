@@ -64,7 +64,7 @@
             $('#node-input-target').typedInput({
                 default: 'str',
                 types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
-                typeField: $('#node-input-sourceType'),
+                typeField: $('#node-input-targetType'),
             });
 
             $('#node-input-data').typedInput({
@@ -82,105 +82,89 @@
             });
 
             $('#node-input-dynamic').trigger('change');
+
+            var $action = $('#node-input-action');
+            var $actionRadios = $('input[name="node-input-action-radio"]');
+
+            $actionRadios.filter('[value="' + $action.val() + '"]').prop('checked', true);
+
+            $actionRadios.on('change', function () {
+                $action.val(this.value).trigger('change');
+            });
         },
     });
 </script>
 
-<style>
-    .flex-checkbox-row {
-        display: flex;
-        align-items: center;
-        padding-left: 104px;
-        margin-bottom: 12px;
-    }
-    .flex-checkbox-row input[type='checkbox'] {
-        width: auto !important;
-        margin: 0 8px 0 0 !important;
-    }
-    .flex-checkbox-row label {
-        width: auto !important;
-        margin: 0 !important;
-    }
-
-    fieldset.node-red-fieldset {
-        border: 1px solid var(--red-ui-form-input-border-color, #ccc) !important;
-        padding: 12px !important;
-        margin-bottom: 12px !important;
-        border-radius: 4px !important;
-    }
-
-    fieldset.node-red-fieldset legend {
-        border-bottom: none !important;
-        width: auto !important;
-        padding: 0 5px !important;
-        font-size: 13px !important;
-        font-weight: bold !important;
-        color: var(--red-ui-primary-text-color, #555) !important;
-        margin-bottom: 0 !important;
-    }
-
-    .input-width-70 {
-        width: 70% !important;
-    }
-</style>
+<link rel="stylesheet" href="resources/@faigle/node-red-runtime-utils/editor.css" />
 
 <script type="text/html" data-template-name="file-write">
-    <div class="form-row">
-        <label for="node-input-name">
-            <i class="fa fa-tag"></i>
-            <span>Name</span>
-        </label>
-        <input type="text" id="node-input-name" placeholder="Name" class="input-width-70" />
-    </div>
-
-    <div class="form-row flex-checkbox-row">
-        <input type="checkbox" id="node-input-dynamic" class="input-width-70" />
-        <label for="node-input-dynamic">
-            <i class="fa fa-usb"></i>
-            Load from msg.file
-        </label>
-    </div>
-
-    <fieldset id="file-options-group" class="node-red-fieldset">
-        <legend>File Options</legend>
-
-        <div class="form-row" id="row-action">
-            <label for="node-input-action">
-                <i class="fa fa-tasks"></i>
-                Action
+    <div class="faigle-node-editor">
+        <div class="form-row">
+            <label for="node-input-name">
+                <i class="fa fa-tag"></i>
+                <span>Name</span>
             </label>
-            <select id="node-input-action" style="width: 70%">
-                <option value="write">Write (Overwrite)</option>
-                <option value="append">Append</option>
-            </select>
+            <input type="text" id="node-input-name" placeholder="Name" />
         </div>
 
-        <div class="form-row" id="row-target">
-            <label for="node-input-target">
-                <i class="fa fa-file"></i>
-                Target Path
+        <div class="form-row flex-checkbox-row">
+            <input type="checkbox" id="node-input-dynamic" />
+            <label for="node-input-dynamic">
+                <i class="fa fa-usb"></i>
+                Load from msg.file
             </label>
-            <input type="text" id="node-input-target" />
-            <input type="hidden" id="node-input-targetType" />
         </div>
 
-        <div class="form-row" id="row-data">
-            <label for="node-input-data">
-                <i class="fa fa-envelope"></i>
-                Data
-            </label>
-            <input type="text" id="node-input-data" />
-            <input type="hidden" id="node-input-dataType" />
-        </div>
-    </fieldset>
+        <fieldset id="file-options-group" class="node-red-fieldset">
+            <legend>File Options</legend>
 
-    <div class="form-row flex-checkbox-row">
-        <input type="checkbox" id="node-input-createDir" class="input-width-70" />
-        <label for="node-input-createDir">&nbsp;</label>
-        <label for="node-input-createDir">
-            <i class="fa fa-plus"></i>
-            Create target directory
-        </label>
+            <div class="form-row" id="row-action">
+                <label>
+                    <i class="fa fa-tasks"></i>
+                    Action
+                </label>
+
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="node-input-action-radio" value="write" />
+                        Write
+                    </label>
+
+                    <label>
+                        <input type="radio" name="node-input-action-radio" value="append" />
+                        Append
+                    </label>
+                </div>
+
+                <input type="hidden" id="node-input-action" />
+            </div>
+
+            <div class="form-row" id="row-target">
+                <label for="node-input-target">
+                    <i class="fa fa-sign-in"></i>
+                    Destination Path
+                </label>
+                <input type="text" id="node-input-target" />
+                <input type="hidden" id="node-input-targetType" />
+            </div>
+
+            <div class="form-row" id="row-data">
+                <label for="node-input-data">
+                    <i class="fa fa-envelope"></i>
+                    Data
+                </label>
+                <input type="text" id="node-input-data" />
+                <input type="hidden" id="node-input-dataType" />
+            </div>
+
+            <div class="form-row flex-checkbox-row" id="row-createDir">
+                <input type="checkbox" id="node-input-createDir" />
+                <label for="node-input-createDir">
+                    <i class="fa fa-plus"></i>
+                    Create target directory
+                </label>
+            </div>
+        </fieldset>
     </div>
 </script>
 

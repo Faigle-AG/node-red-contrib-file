@@ -10,7 +10,7 @@ module.exports = function (RED) {
         this.action = config.action;
         this.target = config.target;
         this.targetType = config.targetType || 'str';
-        this.data = config.data || 'payload';
+        this.data = config.data || 'file.data';
         this.dataType = config.dataType || 'msg';
         this.createDir = config.createDir;
 
