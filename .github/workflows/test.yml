@@ -28,6 +28,7 @@ jobs:
       run: |
         node -v
         npm -v
-        npm ls node-red node-red-node-test-helper @faigle/node-red-runtime-utils
+        node -p "require('./node_modules/@faigle/node-red-runtime-utils/package.json').version"
+        npm view @faigle/node-red-runtime-utils version
 
     - run: npm test
