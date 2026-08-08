@@ -177,6 +177,7 @@ describe('file-write node', function () {
                 file: {
                     action: 'write',
                     path: target,
+                    createDir: true,
                     data: 'dynamic\n',
                     extra: 'preserved',
                 },

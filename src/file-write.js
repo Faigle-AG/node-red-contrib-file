@@ -26,6 +26,7 @@ module.exports = function (RED) {
                 const fileData = node.dynamic
                     ? msg.file && msg.file.data
                     : await node.getTypedProperty(node.data, node.dataType, msg);
+                const createDir = node.dynamic ? msg.file && msg.file.createDir : node.createDir;
 
                 if (!targetPathRaw) throw new Error('Target path is missing');
                 if (!currentAction) throw new Error('Action is missing');
@@ -34,7 +35,7 @@ module.exports = function (RED) {
                 const targetPath = path.normalize(targetPathRaw);
                 const parsed = path.parse(targetPath);
 
-                if (node.createDir) {
+                if (createDir) {
                     const destDir = path.dirname(targetPath);
                     if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
                 }

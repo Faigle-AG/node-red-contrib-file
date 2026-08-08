@@ -26,6 +26,7 @@ module.exports = function (RED) {
                 const destRaw = node.dynamic
                     ? msg.file && msg.file.destination
                     : await node.getTypedProperty(node.destination, node.destinationType, msg);
+                const createDir = node.dynamic ? msg.file && msg.file.createDir : node.createDir;
 
                 if (!currentAction) throw new Error('Action is missing');
                 if (!srcRaw) throw new Error('Source path is missing');
@@ -44,7 +45,7 @@ module.exports = function (RED) {
                         return;
                     }
 
-                    if (node.createDir) {
+                    if (createDir) {
                         const destDir = path.dirname(destPath);
                         if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
                     }
