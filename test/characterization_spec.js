@@ -89,17 +89,18 @@ describe('file nodes characterization', function () {
             }
         });
 
-        it('legacy: validation errors carry no code and show the message as status', async function () {
+        it('validation errors carry codes but keep the message as status text', async function () {
             await load('file-read', { actionRead: true, source: '' });
-            const noSource = await trigger(helper, 'n1', 'out', {});
-            assert.equal(noSource.err.code, undefined);
+            const noSource = await trigger(helper, 'n1', 'out', {}, { settleMs: 50 });
+            assert.equal(noSource.err.code, 'SOURCE_PATH_MISSING');
             assert.equal(noSource.err.message, 'Source path is missing');
             assert.equal(lastStatusText(noSource), 'Source path is missing');
+            assert.deepEqual(noSource.extra, { outputs: 0, errors: 0 });
 
             helper.unload();
             await load('file-read', { dynamic: true });
             const noAction = await trigger(helper, 'n1', 'out', { file: { path: 'x' } });
-            assert.equal(noAction.err.code, undefined);
+            assert.equal(noAction.err.code, 'ACTION_MISSING');
             assert.equal(
                 noAction.err.message,
                 'Dynamic action requested but msg.file.action is missing',
@@ -125,7 +126,7 @@ describe('file nodes characterization', function () {
             assert.equal(result.msg.file.exists, true);
         });
 
-        it('exposes native codes to Catch nodes and omits code for validation errors', async function () {
+        it('exposes native and validation codes to Catch nodes', async function () {
             await load('file-read', { dynamic: true }, [
                 { id: 'c1', type: 'catch', scope: null, uncaught: false, wires: [['caught']] },
                 { id: 'caught', type: 'helper' },
@@ -140,7 +141,7 @@ describe('file nodes characterization', function () {
             assert.equal(caught.length, 2);
             const codes = caught.map((msg) => msg.error.code);
             assert.ok(codes.includes('ENOENT'));
-            assert.ok(codes.includes(undefined));
+            assert.ok(codes.includes('ACTION_MISSING'));
         });
     });
 
@@ -169,13 +170,13 @@ describe('file nodes characterization', function () {
             assert.equal(fs.readFileSync(work('empty.txt'), 'utf8'), '');
         });
 
-        it('legacy: static data without msg.file fails with an uncoded TypeError', async function () {
+        it('static data without msg.file fails as DATA_MISSING, keeping the TypeError', async function () {
             await load('file-write', { action: 'write', target: work('none.txt') });
 
             const result = await trigger(helper, 'n1', 'out', {});
 
             assert.ok(result.err instanceof TypeError);
-            assert.equal(result.err.code, undefined);
+            assert.equal(result.err.code, 'DATA_MISSING');
             assert.equal(lastStatusText(result), 'Configuration error');
             assert.equal(fs.existsSync(work('none.txt')), false);
         });
@@ -195,22 +196,35 @@ describe('file nodes characterization', function () {
             assert.equal(lastStatusText(number), 'Configuration error');
         });
 
-        it('legacy: validation errors carry no code and show "Configuration error"', async function () {
+        it('validation errors carry codes and still show "Configuration error"', async function () {
             await load('file-write', { dynamic: true });
 
             const cases = [
-                [{ file: { action: 'write', data: 'x' } }, 'Target path is missing'],
-                [{ file: { path: work('x.txt'), data: 'x' } }, 'Action is missing'],
-                [{ file: { action: 'write', path: work('x.txt') } }, 'Data to write is undefined'],
+                [
+                    { file: { action: 'write', data: 'x' } },
+                    'Target path is missing',
+                    'TARGET_PATH_MISSING',
+                ],
+                [
+                    { file: { path: work('x.txt'), data: 'x' } },
+                    'Action is missing',
+                    'ACTION_MISSING',
+                ],
+                [
+                    { file: { action: 'write', path: work('x.txt') } },
+                    'Data to write is undefined',
+                    'DATA_MISSING',
+                ],
                 [
                     { file: { action: 'remove', path: work('x.txt'), data: 'x' } },
                     'Unknown action type: remove',
+                    'INVALID_ACTION',
                 ],
             ];
-            for (const [input, message] of cases) {
+            for (const [input, message, code] of cases) {
                 const result = await trigger(helper, 'n1', 'out', input);
                 assert.equal(result.err.message, message);
-                assert.equal(result.err.code, undefined);
+                assert.equal(result.err.code, code);
                 assert.equal(lastStatusText(result), 'Configuration error');
             }
             assert.equal(fs.existsSync(work('x.txt')), false);
@@ -240,6 +254,29 @@ describe('file nodes characterization', function () {
             });
 
             assert.equal(fs.readFileSync(work(' spaced.txt '), 'utf8'), 's');
+        });
+
+        it('rejects an unknown action before creating parent directories', async function () {
+            await load('file-write', { dynamic: true });
+
+            const result = await trigger(
+                helper,
+                'n1',
+                'out',
+                {
+                    file: {
+                        action: 'remove',
+                        path: work('newdir', 'x.txt'),
+                        data: 'x',
+                        createDir: true,
+                    },
+                },
+                { settleMs: 50 },
+            );
+
+            assert.equal(result.err.code, 'INVALID_ACTION');
+            assert.equal(fs.existsSync(work('newdir')), false);
+            assert.deepEqual(result.extra, { outputs: 0, errors: 0 });
         });
     });
 
@@ -315,7 +352,7 @@ describe('file nodes characterization', function () {
             }
         });
 
-        it('legacy: an unknown action creates the destination directory before failing', async function () {
+        it('rejects an unknown action before creating the destination directory', async function () {
             await load('file-transfer', {
                 action: 'rename',
                 source: work('a.txt'),
@@ -323,15 +360,16 @@ describe('file nodes characterization', function () {
                 createDir: true,
             });
 
-            const result = await trigger(helper, 'n1', 'out', {});
+            const result = await trigger(helper, 'n1', 'out', {}, { settleMs: 50 });
 
             assert.equal(result.err.message, 'Unknown action type: rename');
-            assert.equal(result.err.code, undefined);
+            assert.equal(result.err.code, 'INVALID_ACTION');
             assert.equal(lastStatusText(result), 'Configuration error');
-            assert.equal(fs.existsSync(work('newdir')), true);
+            assert.equal(fs.existsSync(work('newdir')), false);
+            assert.deepEqual(result.extra, { outputs: 0, errors: 0 });
         });
 
-        it('legacy: copy/move without a destination fails without a code', async function () {
+        it('copy/move without a destination fails with DESTINATION_PATH_MISSING', async function () {
             await load('file-transfer', { dynamic: true });
 
             const result = await trigger(helper, 'n1', 'out', {
@@ -339,7 +377,7 @@ describe('file nodes characterization', function () {
             });
 
             assert.equal(result.err.message, 'Destination path is missing');
-            assert.equal(result.err.code, undefined);
+            assert.equal(result.err.code, 'DESTINATION_PATH_MISSING');
         });
     });
 });

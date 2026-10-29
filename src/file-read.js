@@ -3,6 +3,15 @@ module.exports = function (RED) {
     const path = require('path');
     const { extendNode } = require('@faigle/node-red-runtime-utils')(RED);
 
+    // Codes added to previously uncoded errors keep their message as status text,
+    // so Status-node consumers see the same text as before.
+    function createError(message, code) {
+        const err = new Error(message);
+        err.code = code;
+        Object.defineProperty(err, 'statusText', { value: message });
+        return err;
+    }
+
     function FileReadNode(config) {
         RED.nodes.createNode(this, config);
         this.dynamic = config.dynamic;
@@ -26,9 +35,15 @@ module.exports = function (RED) {
 
                 if (node.dynamic) {
                     if (!msg.file || !msg.file.action)
-                        throw new Error('Dynamic action requested but msg.file.action is missing');
+                        throw createError(
+                            'Dynamic action requested but msg.file.action is missing',
+                            'ACTION_MISSING',
+                        );
                     if (!msg.file || !msg.file.path)
-                        throw new Error('Dynamic action requested but msg.file.path is missing');
+                        throw createError(
+                            'Dynamic action requested but msg.file.path is missing',
+                            'SOURCE_PATH_MISSING',
+                        );
 
                     sourcePathRaw = msg.file.path;
 
@@ -54,9 +69,10 @@ module.exports = function (RED) {
                     runStat = node.actionStat;
                 }
 
-                if (!sourcePathRaw) throw new Error('Source path is missing');
+                if (!sourcePathRaw)
+                    throw createError('Source path is missing', 'SOURCE_PATH_MISSING');
                 if (typeof sourcePathRaw !== 'string')
-                    throw new Error('Source path must resolve to a string');
+                    throw createError('Source path must resolve to a string', 'INVALID_PATH');
 
                 const filename = path.normalize(sourcePathRaw);
                 const parsed = path.parse(filename);
@@ -100,7 +116,9 @@ module.exports = function (RED) {
 
                 if (done) done();
             } catch (err) {
-                node.status.failed(err.code || err.message || 'Configuration error');
+                node.status.failed(
+                    err.statusText || err.code || err.message || 'Configuration error',
+                );
                 if (done) done(err);
                 else node.error(err, msg);
             }

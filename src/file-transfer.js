@@ -3,6 +3,12 @@ module.exports = function (RED) {
     const path = require('path');
     const { extendNode } = require('@faigle/node-red-runtime-utils')(RED);
 
+    function createError(message, code) {
+        const err = new Error(message);
+        err.code = code;
+        return err;
+    }
+
     function FileTransferNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -28,21 +34,32 @@ module.exports = function (RED) {
                     : await node.getTypedProperty(node.destination, node.destinationType, msg);
                 const createDir = node.dynamic ? msg.file && msg.file.createDir : node.createDir;
 
-                if (!currentAction) throw new Error('Action is missing');
-                if (!srcRaw) throw new Error('Source path is missing');
+                if (!currentAction) throw createError('Action is missing', 'ACTION_MISSING');
+                if (!srcRaw) throw createError('Source path is missing', 'SOURCE_PATH_MISSING');
 
                 const srcPath = path.normalize(srcRaw);
                 let destPath = null;
                 let parsed = null;
 
                 if (currentAction !== 'delete') {
-                    if (!destRaw) throw new Error('Destination path is missing');
+                    if (!destRaw)
+                        throw createError(
+                            'Destination path is missing',
+                            'DESTINATION_PATH_MISSING',
+                        );
 
                     destPath = path.normalize(destRaw);
 
                     if (srcPath === destPath) {
                         finishAction('Source and Destination are identical', srcPath, destPath);
                         return;
+                    }
+
+                    if (currentAction !== 'copy' && currentAction !== 'move') {
+                        throw createError(
+                            `Unknown action type: ${currentAction}`,
+                            'INVALID_ACTION',
+                        );
                     }
 
                     if (createDir) {
@@ -107,9 +124,6 @@ module.exports = function (RED) {
                             finishAction(`Deleted ${file.base}`, srcPath, null);
                         });
                         break;
-
-                    default:
-                        throw new Error(`Unknown action type: ${currentAction}`);
                 }
 
                 function finishAction(statusText) {

@@ -3,6 +3,12 @@ module.exports = function (RED) {
     const path = require('path');
     const { extendNode } = require('@faigle/node-red-runtime-utils')(RED);
 
+    function createError(message, code) {
+        const err = new Error(message);
+        err.code = code;
+        return err;
+    }
+
     function FileWriteNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -17,6 +23,19 @@ module.exports = function (RED) {
         var node = this;
         extendNode(node);
 
+        // A msg data path through a missing parent (e.g. file.data without msg.file) throws a
+        // TypeError; tag it DATA_MISSING and keep its message and status text.
+        async function getStaticData(msg) {
+            try {
+                return await node.getTypedProperty(node.data, node.dataType, msg);
+            } catch (err) {
+                if (node.dataType === 'msg' && err instanceof TypeError && !err.code) {
+                    err.code = 'DATA_MISSING';
+                }
+                throw err;
+            }
+        }
+
         node.on('input', async function (msg, send, done) {
             try {
                 const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
@@ -25,12 +44,16 @@ module.exports = function (RED) {
                     : await node.getTypedProperty(node.target, node.targetType, msg);
                 const fileData = node.dynamic
                     ? msg.file && msg.file.data
-                    : await node.getTypedProperty(node.data, node.dataType, msg);
+                    : await getStaticData(msg);
                 const createDir = node.dynamic ? msg.file && msg.file.createDir : node.createDir;
 
-                if (!targetPathRaw) throw new Error('Target path is missing');
-                if (!currentAction) throw new Error('Action is missing');
-                if (fileData === undefined) throw new Error('Data to write is undefined');
+                if (!targetPathRaw)
+                    throw createError('Target path is missing', 'TARGET_PATH_MISSING');
+                if (!currentAction) throw createError('Action is missing', 'ACTION_MISSING');
+                if (fileData === undefined)
+                    throw createError('Data to write is undefined', 'DATA_MISSING');
+                if (currentAction !== 'write' && currentAction !== 'append')
+                    throw createError(`Unknown action type: ${currentAction}`, 'INVALID_ACTION');
 
                 const targetPath = path.normalize(targetPathRaw);
                 const parsed = path.parse(targetPath);
@@ -69,9 +92,6 @@ module.exports = function (RED) {
                             finishAction(`Wrote ${file.base}`);
                         });
                         break;
-
-                    default:
-                        throw new Error(`Unknown action type: ${currentAction}`);
                 }
 
                 function finishAction(statusText) {

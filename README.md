@@ -32,11 +32,7 @@ msg.file = {
 return msg;
 ```
 
-For `read`, the file content is returned as `msg.file.data`.
-
-For `exists`, the result is returned as `msg.file.exists`.
-
-For `stat`, the result is returned as `msg.file.stats`.
+With the default **Output To: msg.file**, `read` returns `msg.file.data`, `exists` returns `msg.file.exists`, and `stat` returns `msg.file.stats`. A custom output property receives the whole result object instead.
 
 ---
 
@@ -99,25 +95,81 @@ msg.file = {
 return msg;
 ```
 
-## Dynamic Mode
+## Storage Message Protocol (msg.file)
 
-All nodes support **Load from `msg.file`** mode.
+These nodes share the `msg.file` request vocabulary with the directory nodes and Azure Files nodes. This is a common vocabulary, not a guarantee that every provider has identical results. Existing output routes and filesystem error behavior are preserved.
 
-When enabled, the node ignores the configured editor fields and reads the operation details from `msg.file`. This allows flows to decide file operations at runtime.
+### Requests and typed fields
 
-## Output
+Enable **Load from msg.file** to use the following dynamic fields. In this mode, operation fields come from the message; the file-read **Output To** configuration still applies. Otherwise, operation fields come from the editor's typed properties.
 
-Each node writes normalized file metadata to `msg.file`, including:
+| Node          | Action                   | Required dynamic fields           | Optional fields             |
+| ------------- | ------------------------ | --------------------------------- | --------------------------- |
+| file-read     | `read`, `exists`, `stat` | `action`, `path`                  | Combine actions as an array |
+| file-write    | `write`, `append`        | `action`, `path`, `data`          | `createDir`                 |
+| file-transfer | `copy`, `move`           | `action`, `source`, `destination` | `createDir`                 |
+| file-transfer | `delete`                 | `action`, `source`                | Destination is ignored      |
 
-- `filetype`
-- `path`
-- `dir`
-- `base`
-- `name`
-- `ext`
+Use exact lowercase action names. A portable read combination is `['read', 'exists', 'stat']`; literal-boolean action objects such as `{read: true, stat: true}` are also supported. Local legacy string parsing matches substrings and can select unintended actions; use exact names or arrays in new flows. Read operations share one success/error outcome, not one output per action.
 
-Additional fields depend on the node and action:
+Dynamic `createDir` does not inherit the editor checkbox; send `true` explicitly when parent creation is wanted. Paths are literal resource paths, not message-property names. Transfer destinations include the target filename.
 
-- `file-read`: `data`, `exists`, or `stats`
-- `file-write`: written file metadata
-- `file-transfer`: `action`, `source`, and `destination`
+```js
+// file-read, Load from msg.file enabled; Output To: msg.file
+msg.file = { action: ['read', 'stat'], path: '/data/in/report.txt' };
+return msg;
+```
+
+```js
+// file-write, Load from msg.file enabled
+msg.file = {
+    action: 'write',
+    path: '/data/out/report.txt',
+    data: '', // Empty files are valid.
+    createDir: true,
+};
+return msg;
+```
+
+```js
+// file-transfer, Load from msg.file enabled
+msg.file = {
+    action: 'copy',
+    source: '/data/in/report.txt',
+    destination: '/data/archive/report.txt',
+    createDir: true,
+};
+return msg;
+```
+
+Configured input paths/data support `msg`, `flow`, `global`, `str`, `jsonata`, and `env`. Read output supports `msg`, `flow`, and `global`; it defaults to `msg.file`. Write data defaults to the typed property `msg.file.data`. For the default static `file.data` setting, `msg.file = {}` resolves to an empty string and writes an empty file; omitting `msg.file` entirely instead causes an uncoded TypeError and writes nothing. Successful typed resolutions of undefined/null become an empty string. Dynamic `msg.file.data` is read directly: missing data errors, while `null` writes the text `null`. Strings and Buffers are supported; non-Buffer objects are JSON-stringified. Dynamic numeric/boolean data is rejected by the local filesystem API with `ERR_INVALID_ARG_TYPE`, unlike Azure's scalar-to-string conversion. Empty string and zero-length Buffer are valid.
+
+### Outputs
+
+Common metadata contains `filetype`, normalized `path`, `dir`, `base`, `name`, and `ext`.
+
+- **Read:** merges metadata and requested `data` (Buffer), `exists` (boolean), or `stats` (native `fs.Stats`) into the configured output property. It does not force data into `msg.payload` or force metadata into `msg.file` when another target is selected.
+- **Write/append:** merges path metadata into `msg.file`, preserving other message fields.
+- **Copy/move:** merges metadata plus `action`, `source`, `destination`; `path` is the destination. When normalized source and destination are identical, the node forwards the message unchanged without checking whether the source exists.
+- **Delete:** success merges source metadata, sets `destination: null`, and sets `msg.payload = true`. A missing source is an error, unlike Azure Files' delete-if-exists result.
+
+Merges preserve custom fields and can retain results from earlier operations. Only fields requested and computed by the current operation should be treated as fresh results. File stats include native methods and are not equivalent to Azure's plain metadata object.
+
+### Errors and operational boundaries
+
+Errors go to Node-RED's error/Catch mechanism rather than the normal output. The original message accompanies input failures. `msg.error.code` is available when the underlying error has a code; legacy validation errors do not all have one. A Status node observes status text separately; it is not a substitute for Catch error handling.
+
+| Condition                                                   | Current result                                                                                                                    |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Exists-only request for a missing file                      | Success, `exists: false`                                                                                                          |
+| Read/stat request for a missing file                        | Error, normally `ENOENT`; no normal output                                                                                        |
+| Delete request for a missing file                           | Error, normally `ENOENT`                                                                                                          |
+| Filesystem permission failure                               | Native error such as `EACCES` or `EPERM`; exists-only can return false instead                                                    |
+| Missing dynamic action/path/data or unknown mutation action | Validation error; some legacy errors are uncoded; an unknown action can create parents before failing when `createDir` is enabled |
+| Default static `file.data` with no `msg.file` object        | Uncoded TypeError; no file written; status is `Configuration error`                                                               |
+| Invalid read action                                         | Legacy parser may perform no actions and forward metadata; use documented tokens                                                  |
+| Typed output/context failure                                | Error; a storage operation may already have happened                                                                              |
+
+Paths use the host operating system's `path.normalize`. Relative paths, absolute paths and dot segments are allowed; significant spaces are not trimmed. **This is not a filesystem sandbox.** Validate untrusted paths in the flow, restrict the runtime account's permissions, and avoid directing writable input at sensitive files.
+
+Writes, appends, copies and cross-device moves are not transactional. A failed operation may have changed the destination; inspect it before retrying. Cross-device move falls back to copy followed by source deletion. Do not assume an error means nothing was written, or automatically retry an append. The nodes do not coordinate concurrent writers.
