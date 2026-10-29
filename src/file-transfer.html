@@ -265,5 +265,18 @@ A node to move, rename, copy, or delete a file on the file system.
 
   - **msg.file.ext** _string_ \
     The file extension of the resulting item, including the dot.
+
+### Errors
+
+Failures go to Catch nodes as `msg.error`, with `msg.error.code`; nothing is sent on the output.
+
+- `ACTION_MISSING`, `SOURCE_PATH_MISSING`, `DESTINATION_PATH_MISSING` (copy/move), `INVALID_ACTION`: incomplete or invalid request. The action is checked before any folder is created.
+- Native filesystem codes, for example `ENOENT` for a missing source, including **delete** of a missing file.
+
+When source and destination are the same, the message passes through unchanged.
+
+### Example
+
+With **Load from msg.file** enabled: `msg.file = { action: 'copy', source: '/data/in/report.txt', destination: '/data/archive/report.txt', createDir: true }`.
 </script>
 <!-- @formatter:on -->

@@ -228,5 +228,17 @@ A node to write or append data to a file on the file system.
 
   - **msg.file.ext** _string_ \
     The file extension, including the dot.
+
+### Errors
+
+Failures go to Catch nodes as `msg.error`, with `msg.error.code`; nothing is sent on the output.
+
+- `TARGET_PATH_MISSING`, `ACTION_MISSING`, `INVALID_ACTION`: incomplete or invalid request. The action is checked before any folder is created.
+- `DATA_MISSING`: `msg.file.data` is undefined in dynamic mode, or the configured `msg` data path has a missing parent (for example no `msg.file`).
+- Native filesystem codes, for example `ENOENT` when the folder is missing and `createDir` is off.
+
+### Example
+
+With **Load from msg.file** enabled: `msg.file = { action: 'write', path: '/data/out/report.txt', data: 'hello', createDir: true }`.
 </script>
 <!-- @formatter:on -->

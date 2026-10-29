@@ -181,6 +181,33 @@ describe('file nodes characterization', function () {
             assert.equal(fs.existsSync(work('none.txt')), false);
         });
 
+        it('keeps unrelated TypeErrors from msg data getters uncoded', async function () {
+            await load('file-write', { action: 'write', target: work('getter.txt') });
+            const own = {};
+            Object.defineProperty(own, 'file', {
+                enumerable: true,
+                get() {
+                    throw new TypeError('own getter failed');
+                },
+            });
+            const inherited = Object.create({
+                get file() {
+                    throw new TypeError('inherited getter failed');
+                },
+            });
+
+            for (const [input, message] of [
+                [own, 'own getter failed'],
+                [inherited, 'inherited getter failed'],
+            ]) {
+                const result = await trigger(helper, 'n1', 'out', input);
+                assert.ok(result.err instanceof TypeError);
+                assert.equal(result.err.message, message);
+                assert.equal(result.err.code, undefined);
+            }
+            assert.equal(fs.existsSync(work('getter.txt')), false);
+        });
+
         it('legacy: dynamic null writes "null"; dynamic numbers are rejected by fs', async function () {
             await load('file-write', { dynamic: true });
 

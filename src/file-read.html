@@ -206,6 +206,17 @@ A node to read a file, check its existence, or retrieve its statistics.
     The exists status of the file if the action was `Check Exists`.
 
   - **msg.file.stats** _object_ \
-    The Node.js `fs.Stats` object for the file (will be `null` if unavailable) if the action was `Get Stat`.
+    The Node.js `fs.Stats` object for the file if the action was `Get Stat`. A missing file makes `Get Stat` fail with `ENOENT`.
+
+### Errors
+
+Failures go to Catch nodes as `msg.error`, with `msg.error.code`; nothing is sent on the output.
+
+- `ACTION_MISSING`, `SOURCE_PATH_MISSING`, `INVALID_PATH`: incomplete or invalid request. The status shows the message.
+- Native filesystem codes, for example `ENOENT` when **Read** or **Get Stat** targets a missing file. **Check Exists** returns `false` instead of failing.
+
+### Example
+
+With **Load from msg.file** enabled: `msg.file = { action: ['read', 'stat'], path: '/data/in/report.txt' }`.
 </script>
 <!-- @formatter:on -->
