@@ -182,7 +182,7 @@ A node to write or append data to a file on the file system.
   Select whether to write (overwrite) the file or append data to the end of it.
 
 - **Destination Path** _string | msg | flow | global | env | JSONata_ \
-  The absolute path to the destination file.
+  Path of the destination file, absolute or relative to the Node-RED working directory.
 
 - **Data** _string | msg_ \
   The content to be written or appended to the file.
@@ -215,10 +215,10 @@ A node to write or append data to a file on the file system.
     The type of item that triggered the event (`file`).
 
   - **msg.file.path** _string_ \
-    The complete, normalized "absolute" path to the item.
+    The normalized path to the item, absolute or relative as given.
 
   - **msg.file.dir** _string_ \
-    The "absolute" path to the parent directory containing the item.
+    The parent directory part of the normalized path.
 
   - **msg.file.base** _string_ \
     The name of the file _with_ the extension.
@@ -231,7 +231,7 @@ A node to write or append data to a file on the file system.
 
 ### Errors
 
-Failures go to Catch nodes as `msg.error`, with `msg.error.code`; nothing is sent on the output.
+Failures go to Catch nodes as `msg.error`, with `msg.error.code` when available; nothing is sent on the output.
 
 - `TARGET_PATH_MISSING`, `ACTION_MISSING`, `INVALID_ACTION`: incomplete or invalid request. The action is checked before any folder is created.
 - `DATA_MISSING`: `msg.file.data` is undefined in dynamic mode, or the configured `msg` data path has a missing parent (for example no `msg.file`).

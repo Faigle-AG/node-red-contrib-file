@@ -210,10 +210,10 @@ A node to move, rename, copy, or delete a file on the file system.
   Select the file operation to perform: Move / Rename, Copy, or Delete.
 
 - **Source Path** _string | msg_ \
-  The absolute path to the target file you want to transfer or delete.
+  Path of the file to transfer or delete, absolute or relative to the Node-RED working directory.
 
 - **Destination Path** _string | msg_ \
-  The absolute path to the destination. Must include the target file name. _(Hidden if action is set to Delete)._
+  Path of the destination, absolute or relative. Must include the target file name. _(Hidden if action is set to Delete)._
 
 - **Create target directory** _boolean_ \
   If enabled, the node will automatically create the destination directory structure if it does not already exist. _(Hidden if action is set to Delete)._
@@ -229,10 +229,10 @@ A node to move, rename, copy, or delete a file on the file system.
     The action to execute if triggered dynamically (`move`, `copy`, or `delete`).
 
   - **msg.file.source** _string_ \
-    The original absolute path to the file.
+    The path of the file to transfer or delete.
 
   - **msg.file.destination** _string_ \
-    The destination absolute path to the file (omitted for delete operations).
+    The destination path of the file (ignored for delete operations).
 
 ### Outputs
 
@@ -246,16 +246,16 @@ A node to move, rename, copy, or delete a file on the file system.
     The action performed (`move`, `copy`, or `delete`).
 
   - **msg.file.source** _string_ \
-    The normalized absolute path of the original file.
+    The normalized path of the original file.
 
   - **msg.file.destination** _string_ \
-    The normalized absolute path of the destination (omitted for delete operations).
+    The normalized path of the destination (`null` for delete operations).
 
   - **msg.file.path** _string_ \
-    The normalized absolute path to the resulting item (the destination if moved/copied, or the source if deleted).
+    The normalized path to the resulting item (the destination if moved/copied, or the source if deleted).
 
   - **msg.file.dir** _string_ \
-    The "absolute" path to the parent directory of the resulting item.
+    The parent directory part of the resulting path.
 
   - **msg.file.base** _string_ \
     The name of the resulting item _with_ the extension.
@@ -268,7 +268,7 @@ A node to move, rename, copy, or delete a file on the file system.
 
 ### Errors
 
-Failures go to Catch nodes as `msg.error`, with `msg.error.code`; nothing is sent on the output.
+Failures go to Catch nodes as `msg.error`, with `msg.error.code` when available; nothing is sent on the output.
 
 - `ACTION_MISSING`, `SOURCE_PATH_MISSING`, `DESTINATION_PATH_MISSING` (copy/move), `INVALID_ACTION`: incomplete or invalid request. The action is checked before any folder is created.
 - Native filesystem codes, for example `ENOENT` for a missing source, including **delete** of a missing file.
