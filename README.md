@@ -142,7 +142,7 @@ msg.file = {
 return msg;
 ```
 
-Configured input paths/data support `msg`, `flow`, `global`, `str`, `jsonata`, and `env`. Read output supports `msg`, `flow`, and `global`; it defaults to `msg.file`. Write data defaults to the typed property `msg.file.data`. For the default static `file.data` setting, `msg.file = {}` resolves to an empty string and writes an empty file; omitting `msg.file` entirely instead causes an uncoded TypeError and writes nothing. Successful typed resolutions of undefined/null become an empty string. Dynamic `msg.file.data` is read directly: missing data errors, while `null` writes the text `null`. Strings and Buffers are supported; non-Buffer objects are JSON-stringified. Dynamic numeric/boolean data is rejected by the local filesystem API with `ERR_INVALID_ARG_TYPE`, unlike Azure's scalar-to-string conversion. Empty string and zero-length Buffer are valid.
+Configured input paths/data support `msg`, `flow`, `global`, `str`, `jsonata`, and `env`. Read output supports `msg`, `flow`, and `global`; it defaults to `msg.file`. Write data defaults to the typed property `msg.file.data`. For the default static `file.data` setting, `msg.file = {}` resolves to an empty string and writes an empty file; omitting `msg.file` entirely instead causes a TypeError with code `DATA_MISSING` and writes nothing. Successful typed resolutions of undefined/null become an empty string. Dynamic `msg.file.data` is read directly: missing data errors, while `null` writes the text `null`. Strings and Buffers are supported; non-Buffer objects are JSON-stringified. Dynamic numeric/boolean data is rejected by the local filesystem API with `ERR_INVALID_ARG_TYPE`, unlike Azure's scalar-to-string conversion. Empty string and zero-length Buffer are valid.
 
 ### Outputs
 
@@ -153,22 +153,25 @@ Common metadata contains `filetype`, normalized `path`, `dir`, `base`, `name`, a
 - **Copy/move:** merges metadata plus `action`, `source`, `destination`; `path` is the destination. When normalized source and destination are identical, the node forwards the message unchanged without checking whether the source exists.
 - **Delete:** success merges source metadata, sets `destination: null`, and sets `msg.payload = true`. A missing source is an error, unlike Azure Files' delete-if-exists result.
 
+For compatibility, file-transfer's same-path no-op occurs before checking whether a non-delete action is supported; such a no-op performs no storage operation. Other unknown mutation actions error before creating parents.
+
 Merges preserve custom fields and can retain results from earlier operations. Only fields requested and computed by the current operation should be treated as fresh results. File stats include native methods and are not equivalent to Azure's plain metadata object.
 
 ### Errors and operational boundaries
 
-Errors go to Node-RED's error/Catch mechanism rather than the normal output. The original message accompanies input failures. `msg.error.code` is available when the underlying error has a code; legacy validation errors do not all have one. A Status node observes status text separately; it is not a substitute for Catch error handling.
+Errors go to Node-RED's error/Catch mechanism rather than the normal output. The original message accompanies input failures. `msg.error.code` identifies missing action/path/data and invalid mutation actions; native filesystem codes are preserved, while other evaluation errors may remain uncoded. Adding validation codes does not change their existing Status-node text. A Status node observes status text separately; it is not a substitute for Catch error handling.
 
-| Condition                                                   | Current result                                                                                                                    |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Exists-only request for a missing file                      | Success, `exists: false`                                                                                                          |
-| Read/stat request for a missing file                        | Error, normally `ENOENT`; no normal output                                                                                        |
-| Delete request for a missing file                           | Error, normally `ENOENT`                                                                                                          |
-| Filesystem permission failure                               | Native error such as `EACCES` or `EPERM`; exists-only can return false instead                                                    |
-| Missing dynamic action/path/data or unknown mutation action | Validation error; some legacy errors are uncoded; an unknown action can create parents before failing when `createDir` is enabled |
-| Default static `file.data` with no `msg.file` object        | Uncoded TypeError; no file written; status is `Configuration error`                                                               |
-| Invalid read action                                         | Legacy parser may perform no actions and forward metadata; use documented tokens                                                  |
-| Typed output/context failure                                | Error; a storage operation may already have happened                                                                              |
+| Condition                                                   | Current result                                                                                                                                                                                              |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exists-only request for a missing file                      | Success, `exists: false`                                                                                                                                                                                    |
+| Read/stat request for a missing file                        | Error, normally `ENOENT`; no normal output                                                                                                                                                                  |
+| Delete request for a missing file                           | Error, normally `ENOENT`                                                                                                                                                                                    |
+| Filesystem permission failure                               | Native error such as `EACCES` or `EPERM`; exists-only can return false instead                                                                                                                              |
+| Missing dynamic action/path/data or unknown mutation action | `ACTION_MISSING`, `SOURCE_PATH_MISSING`, `TARGET_PATH_MISSING`, `DESTINATION_PATH_MISSING`, `DATA_MISSING` or `INVALID_ACTION`, as applicable; unknown mutation actions are rejected before parent creation |
+| Default static `file.data` with no `msg.file` object        | TypeError with `DATA_MISSING`; no file written; status remains `Configuration error`                                                                                                                        |
+| Unrecognized read token                                     | Legacy parser may perform no actions and forward metadata; use documented tokens                                                                                                                            |
+| Non-string file-read path                                   | `INVALID_PATH`; falsy path values are reported as missing                                                                                                                                                   |
+| Typed output/context failure                                | Error; a storage operation may already have happened                                                                                                                                                        |
 
 Paths use the host operating system's `path.normalize`. Relative paths, absolute paths and dot segments are allowed; significant spaces are not trimmed. **This is not a filesystem sandbox.** Validate untrusted paths in the flow, restrict the runtime account's permissions, and avoid directing writable input at sensitive files.
 
