@@ -23,7 +23,18 @@ module.exports = function (RED) {
         var node = this;
         extendNode(node);
 
+        // After close, input still in progress starts no new filesystem operation and completes
+        // without status, output or error; only a cross-device move stopped part-way completes
+        // with an error (see below).
+        let closing = false;
+        node.on('close', function () {
+            closing = true;
+        });
+
         node.on('input', async function (msg, send, done) {
+            const finishClosed = () => {
+                if (done) done();
+            };
             try {
                 const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
                 const srcRaw = node.dynamic
@@ -33,6 +44,9 @@ module.exports = function (RED) {
                     ? msg.file && msg.file.destination
                     : await node.getTypedProperty(node.destination, node.destinationType, msg);
                 const createDir = node.dynamic ? msg.file && msg.file.createDir : node.createDir;
+
+                // The node may have closed while the paths were read.
+                if (closing) return finishClosed();
 
                 if (!currentAction) throw createError('Action is missing', 'ACTION_MISSING');
                 if (!srcRaw) throw createError('Source path is missing', 'SOURCE_PATH_MISSING');
@@ -95,7 +109,14 @@ module.exports = function (RED) {
                     case 'move':
                         fs.rename(srcPath, destPath, (err) => {
                             if (err && err.code === 'EXDEV') {
+                                // A cross-device move copies, then removes the source. After close
+                                // it starts no next step and completes with an error, so the move
+                                // is not reported as done. The source is kept because its removal
+                                // never starts; a copy already made stays.
+                                if (closing) return moveStoppedOnClose('before copying');
                                 fs.copyFile(srcPath, destPath, (copyErr) => {
+                                    if (closing)
+                                        return moveStoppedOnClose('after copying', copyErr);
                                     if (copyErr) return handleError(copyErr);
                                     fs.unlink(srcPath, (unlinkErr) => {
                                         if (unlinkErr) return handleError(unlinkErr);
@@ -126,18 +147,35 @@ module.exports = function (RED) {
                         break;
                 }
 
+                // A cross-device move stopped by close reports an error (a copy error as itself),
+                // without status.
+                function moveStoppedOnClose(stage, copyErr) {
+                    const err =
+                        copyErr ||
+                        createError(
+                            `Cross-device move stopped on close ${stage}; the source file was kept`,
+                            'NODE_CLOSING',
+                        );
+                    if (done) done(err);
+                    else node.error(err, msg);
+                }
+
+                // The operation callbacks may run after close.
                 function finishAction(statusText) {
+                    if (closing) return finishClosed();
                     node.status.succeeded(statusText);
                     send(msg);
                     if (done) done();
                 }
 
                 function handleError(err) {
+                    if (closing) return finishClosed();
                     node.status.failed(err.code || 'Error');
                     if (done) done(err);
                     else node.error(err, msg);
                 }
             } catch (err) {
+                if (closing) return finishClosed();
                 node.status.failed('Configuration error');
                 if (done) done(err);
                 else node.error(err, msg);

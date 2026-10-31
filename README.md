@@ -176,3 +176,13 @@ Errors go to Node-RED's error/Catch mechanism rather than the normal output. The
 Paths use the host operating system's `path.normalize`. Relative paths, absolute paths and dot segments are allowed; significant spaces are not trimmed. **This is not a filesystem sandbox.** Validate untrusted paths in the flow, restrict the runtime account's permissions, and avoid directing writable input at sensitive files.
 
 Writes, appends, copies and cross-device moves are not transactional. A failed operation may have changed the destination; inspect it before retrying. Cross-device move falls back to copy followed by source deletion. Do not assume an error means nothing was written, or automatically retry an append. The nodes do not coordinate concurrent writers.
+
+### Shutdown
+
+When a node closes while resolving configured paths or data, it starts no filesystem operation after those reads settle. File-read also checks before starting its configured output write. Late continuations normally finish the input quietly, without a new output message, status update or error report. A blocked cross-device move fallback reports an error instead, as described below.
+
+Already-started filesystem and context operations are not cancelled or rolled back. A write, append, copy, deletion or context update may still take effect after close even though no normal result is forwarded. Do not infer from silence that an operation did not happen, or automatically retry a write or append.
+
+**Cross-device file move:** the `EXDEV` fallback copies the file and then deletes its source. If close is observed before starting the copy, or when the copy callback arrives before source deletion has started, the node stops the fallback and reports `NODE_CLOSING` without a status update. If that copy callback reports a filesystem error, its original error is reported instead. Source deletion does not start after this stop, but the copy may already have created, overwritten or partially changed the destination.
+
+If source deletion had already started when close occurred, it cannot be undone; its late callback follows the ordinary quiet-completion behavior. The source-preservation guarantee applies only when deletion has not started. Inspect both paths before retrying a cross-device move; shutdown is not a transactional rollback.

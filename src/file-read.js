@@ -26,7 +26,17 @@ module.exports = function (RED) {
         var node = this;
         extendNode(node);
 
+        // After close, input still in progress starts no new filesystem operation or output write
+        // and completes without status, output or error.
+        let closing = false;
+        node.on('close', function () {
+            closing = true;
+        });
+
         node.on('input', async function (msg, send, done) {
+            const finishClosed = () => {
+                if (done) done();
+            };
             try {
                 let sourcePathRaw;
                 let runRead;
@@ -69,6 +79,9 @@ module.exports = function (RED) {
                     runStat = node.actionStat;
                 }
 
+                // The node may have closed while the source path was read.
+                if (closing) return finishClosed();
+
                 if (!sourcePathRaw)
                     throw createError('Source path is missing', 'SOURCE_PATH_MISSING');
                 if (typeof sourcePathRaw !== 'string')
@@ -104,10 +117,12 @@ module.exports = function (RED) {
 
                 let currentTargetValue =
                     (await node.getTypedProperty(node.target, node.targetType, msg)) || {};
+                if (closing) return finishClosed();
                 await node.setTypedProperty(node.target, node.targetType, msg, {
                     ...currentTargetValue,
                     ...file,
                 });
+                if (closing) return finishClosed();
 
                 if (acts.length > 0) node.status.succeeded(acts.join(', '));
                 else node.status.info('Did nothing to the file...');
@@ -116,6 +131,7 @@ module.exports = function (RED) {
 
                 if (done) done();
             } catch (err) {
+                if (closing) return finishClosed();
                 node.status.failed(
                     err.statusText || err.code || err.message || 'Configuration error',
                 );

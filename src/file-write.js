@@ -65,7 +65,17 @@ module.exports = function (RED) {
             }
         }
 
+        // After close, input still in progress starts no new filesystem operation and completes
+        // without status, output or error.
+        let closing = false;
+        node.on('close', function () {
+            closing = true;
+        });
+
         node.on('input', async function (msg, send, done) {
+            const finishClosed = () => {
+                if (done) done();
+            };
             try {
                 const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
                 const targetPathRaw = node.dynamic
@@ -75,6 +85,9 @@ module.exports = function (RED) {
                     ? msg.file && msg.file.data
                     : await getStaticData(msg);
                 const createDir = node.dynamic ? msg.file && msg.file.createDir : node.createDir;
+
+                // The node may have closed while the target and data were read.
+                if (closing) return finishClosed();
 
                 if (!targetPathRaw)
                     throw createError('Target path is missing', 'TARGET_PATH_MISSING');
@@ -123,18 +136,22 @@ module.exports = function (RED) {
                         break;
                 }
 
+                // The write callbacks may run after close.
                 function finishAction(statusText) {
+                    if (closing) return finishClosed();
                     node.status.succeeded(statusText);
                     send(msg);
                     if (done) done();
                 }
 
                 function handleError(err) {
+                    if (closing) return finishClosed();
                     node.status.failed(err.code || 'Error');
                     if (done) done(err);
                     else node.error(err, msg);
                 }
             } catch (err) {
+                if (closing) return finishClosed();
                 node.status.failed('Configuration error');
                 if (done) done(err);
                 else node.error(err, msg);
