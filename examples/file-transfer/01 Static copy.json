@@ -1,55 +1,75 @@
 [
-  {
-    "id": "t1001",
-    "type": "inject",
-    "name": "Copy settings.js",
-    "props": [],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 180,
-    "y": 120,
-    "wires": [
-      [
-        "t1002"
-      ]
-    ]
-  },
-  {
-    "id": "t1002",
-    "type": "file-transfer",
-    "name": "Copy settings.js",
-    "dynamic": false,
-    "action": "copy",
-    "source": "./settings.js",
-    "sourceType": "str",
-    "destination": "./test/data/settings-copy.js",
-    "destinationType": "str",
-    "createDir": true,
-    "x": 410,
-    "y": 120,
-    "wires": [
-      [
-        "t1003"
-      ]
-    ]
-  },
-  {
-    "id": "t1003",
-    "type": "debug",
-    "name": "msg.file",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "file",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 620,
-    "y": 120,
-    "wires": []
-  }
+    {
+        "id": "t1000",
+        "type": "tab",
+        "label": "file-transfer 01 \u00b7 Static copy",
+        "disabled": true,
+        "info": "**Copy one file**\n\nCopies the chosen file to the chosen copy path, creating missing parent folders.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n- `NODE_RED_EXAMPLE_COPY`: a disposable file path for the copy\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Copy settings.js** (the original name; it now copies your file).\n\n**Effects:** Creates or overwrites the copy. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` describing the copy.\n\n**Cleanup:** delete the copy and your test file.\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "t1004",
+        "type": "comment",
+        "z": "t1000",
+        "name": "Static copy (see the tab's description)",
+        "info": "**Copy one file**\n\nCopies the chosen file to the chosen copy path, creating missing parent folders.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n- `NODE_RED_EXAMPLE_COPY`: a disposable file path for the copy\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Copy settings.js** (the original name; it now copies your file).\n\n**Effects:** Creates or overwrites the copy. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` describing the copy.\n\n**Cleanup:** delete the copy and your test file.\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "t1001",
+        "type": "inject",
+        "name": "Copy settings.js",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 180,
+        "y": 120,
+        "wires": [
+            [
+                "t1002"
+            ]
+        ],
+        "z": "t1000"
+    },
+    {
+        "id": "t1002",
+        "type": "file-transfer",
+        "name": "Copy settings.js",
+        "dynamic": false,
+        "action": "copy",
+        "source": "NODE_RED_EXAMPLE_FILE",
+        "sourceType": "env",
+        "destination": "NODE_RED_EXAMPLE_COPY",
+        "destinationType": "env",
+        "createDir": true,
+        "x": 410,
+        "y": 120,
+        "wires": [
+            [
+                "t1003"
+            ]
+        ],
+        "z": "t1000"
+    },
+    {
+        "id": "t1003",
+        "type": "debug",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 120,
+        "wires": [],
+        "z": "t1000"
+    }
 ]

@@ -1,109 +1,131 @@
 [
-  {
-    "id": "t3001",
-    "type": "inject",
-    "name": "Dynamic copy",
-    "props": [
-      {
-        "p": "file",
-        "v": "{\"action\":\"copy\",\"source\":\"./settings.js\",\"destination\":\"./test/data/dynamic-copy.js\"}",
-        "vt": "json"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 170,
-    "y": 80,
-    "wires": [
-      [
-        "t3004"
-      ]
-    ]
-  },
-  {
-    "id": "t3002",
-    "type": "inject",
-    "name": "Dynamic move",
-    "props": [
-      {
-        "p": "file",
-        "v": "{\"action\":\"move\",\"source\":\"./test/data/dynamic-copy.js\",\"destination\":\"./test/data/archive/dynamic-copy.js\"}",
-        "vt": "json"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 170,
-    "y": 140,
-    "wires": [
-      [
-        "t3004"
-      ]
-    ]
-  },
-  {
-    "id": "t3003",
-    "type": "inject",
-    "name": "Dynamic delete",
-    "props": [
-      {
-        "p": "file",
-        "v": "{\"action\":\"delete\",\"source\":\"./test/data/archive/dynamic-copy.js\"}",
-        "vt": "json"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 170,
-    "y": 200,
-    "wires": [
-      [
-        "t3004"
-      ]
-    ]
-  },
-  {
-    "id": "t3004",
-    "type": "file-transfer",
-    "name": "Dynamic file transfer",
-    "dynamic": true,
-    "action": "move",
-    "source": "",
-    "sourceType": "str",
-    "destination": "",
-    "destinationType": "str",
-    "createDir": true,
-    "x": 430,
-    "y": 140,
-    "wires": [
-      [
-        "t3005"
-      ]
-    ]
-  },
-  {
-    "id": "t3005",
-    "type": "debug",
-    "name": "msg.file",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "file",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 650,
-    "y": 140,
-    "wires": []
-  }
+    {
+        "id": "t3000",
+        "type": "tab",
+        "label": "file-transfer 03 \u00b7 Dynamic actions",
+        "disabled": true,
+        "info": "**Copy, move and delete per message**\n\nWith **Load from msg.file**, each message names its action and paths. Click the three buttons in order: copy your file, move the copy, delete the moved copy.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n- `NODE_RED_EXAMPLE_COPY`: a disposable file path for the copy\n- `NODE_RED_EXAMPLE_MOVED`: a disposable file path the file is moved to\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Dynamic copy**, **Dynamic move** and **Dynamic delete** in this order.\n\n**Effects:** Creates the copy, moves it, then deletes the moved copy. A delete is not undone. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` after each step.\n\n**Cleanup:** nothing remains except your test file, which you can delete.\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "t3006",
+        "type": "comment",
+        "z": "t3000",
+        "name": "Dynamic actions (see the tab's description)",
+        "info": "**Copy, move and delete per message**\n\nWith **Load from msg.file**, each message names its action and paths. Click the three buttons in order: copy your file, move the copy, delete the moved copy.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n- `NODE_RED_EXAMPLE_COPY`: a disposable file path for the copy\n- `NODE_RED_EXAMPLE_MOVED`: a disposable file path the file is moved to\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Dynamic copy**, **Dynamic move** and **Dynamic delete** in this order.\n\n**Effects:** Creates the copy, moves it, then deletes the moved copy. A delete is not undone. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` after each step.\n\n**Cleanup:** nothing remains except your test file, which you can delete.\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "t3001",
+        "type": "inject",
+        "name": "Dynamic copy",
+        "props": [
+            {
+                "p": "file",
+                "v": "{\"action\": \"copy\", \"source\": $env(\"NODE_RED_EXAMPLE_FILE\"), \"destination\": $env(\"NODE_RED_EXAMPLE_COPY\")}",
+                "vt": "jsonata"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 170,
+        "y": 80,
+        "wires": [
+            [
+                "t3004"
+            ]
+        ],
+        "z": "t3000"
+    },
+    {
+        "id": "t3002",
+        "type": "inject",
+        "name": "Dynamic move",
+        "props": [
+            {
+                "p": "file",
+                "v": "{\"action\": \"move\", \"source\": $env(\"NODE_RED_EXAMPLE_COPY\"), \"destination\": $env(\"NODE_RED_EXAMPLE_MOVED\")}",
+                "vt": "jsonata"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 170,
+        "y": 140,
+        "wires": [
+            [
+                "t3004"
+            ]
+        ],
+        "z": "t3000"
+    },
+    {
+        "id": "t3003",
+        "type": "inject",
+        "name": "Dynamic delete",
+        "props": [
+            {
+                "p": "file",
+                "v": "{\"action\": \"delete\", \"source\": $env(\"NODE_RED_EXAMPLE_MOVED\")}",
+                "vt": "jsonata"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 170,
+        "y": 200,
+        "wires": [
+            [
+                "t3004"
+            ]
+        ],
+        "z": "t3000"
+    },
+    {
+        "id": "t3004",
+        "type": "file-transfer",
+        "name": "Dynamic file transfer",
+        "dynamic": true,
+        "action": "move",
+        "source": "",
+        "sourceType": "str",
+        "destination": "",
+        "destinationType": "str",
+        "createDir": true,
+        "x": 430,
+        "y": 140,
+        "wires": [
+            [
+                "t3005"
+            ]
+        ],
+        "z": "t3000"
+    },
+    {
+        "id": "t3005",
+        "type": "debug",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 140,
+        "wires": [],
+        "z": "t3000"
+    }
 ]

@@ -1,66 +1,86 @@
 [
-  {
-    "id": "w4001",
-    "type": "inject",
-    "name": "Set filename + payload",
-    "props": [
-      {
-        "p": "filename",
-        "v": "./test/data/from-message.txt",
-        "vt": "str"
-      },
-      {
-        "p": "payload",
-        "v": "Target path came from msg.filename",
-        "vt": "str"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 190,
-    "y": 120,
-    "wires": [
-      [
-        "w4002"
-      ]
-    ]
-  },
-  {
-    "id": "w4002",
-    "type": "file-write",
-    "name": "Write path from msg.filename",
-    "dynamic": false,
-    "action": "write",
-    "target": "filename",
-    "targetType": "msg",
-    "data": "payload",
-    "dataType": "msg",
-    "createDir": true,
-    "x": 450,
-    "y": 120,
-    "wires": [
-      [
-        "w4003"
-      ]
-    ]
-  },
-  {
-    "id": "w4003",
-    "type": "debug",
-    "name": "msg.file",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "file",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 680,
-    "y": 120,
-    "wires": []
-  }
+    {
+        "id": "w4000",
+        "type": "tab",
+        "label": "file-write 04 \u00b7 Message target",
+        "disabled": true,
+        "info": "**Take the target path from the message**\n\nThe inject puts the target path into `msg.filename` and the text into `msg.payload`; the node writes there.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_OUTPUT`: a disposable file path to create or overwrite\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Set filename + payload**.\n\n**Effects:** Creates or overwrites the output file. Deploying does nothing until you click.\n\n**Expected result:** the file contains `Target path came from msg.filename`.\n\n**Cleanup:** delete the output file.\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "w4004",
+        "type": "comment",
+        "z": "w4000",
+        "name": "Message target (see the tab's description)",
+        "info": "**Take the target path from the message**\n\nThe inject puts the target path into `msg.filename` and the text into `msg.payload`; the node writes there.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_OUTPUT`: a disposable file path to create or overwrite\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Set filename + payload**.\n\n**Effects:** Creates or overwrites the output file. Deploying does nothing until you click.\n\n**Expected result:** the file contains `Target path came from msg.filename`.\n\n**Cleanup:** delete the output file.\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "w4001",
+        "type": "inject",
+        "name": "Set filename + payload",
+        "props": [
+            {
+                "p": "filename",
+                "v": "NODE_RED_EXAMPLE_OUTPUT",
+                "vt": "env"
+            },
+            {
+                "p": "payload",
+                "v": "Target path came from msg.filename",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 190,
+        "y": 120,
+        "wires": [
+            [
+                "w4002"
+            ]
+        ],
+        "z": "w4000"
+    },
+    {
+        "id": "w4002",
+        "type": "file-write",
+        "name": "Write path from msg.filename",
+        "dynamic": false,
+        "action": "write",
+        "target": "filename",
+        "targetType": "msg",
+        "data": "payload",
+        "dataType": "msg",
+        "createDir": true,
+        "x": 450,
+        "y": 120,
+        "wires": [
+            [
+                "w4003"
+            ]
+        ],
+        "z": "w4000"
+    },
+    {
+        "id": "w4003",
+        "type": "debug",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 120,
+        "wires": [],
+        "z": "w4000"
+    }
 ]

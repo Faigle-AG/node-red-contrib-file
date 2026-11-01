@@ -1,62 +1,82 @@
 [
-  {
-    "id": "a4001",
-    "type": "inject",
-    "name": "Set msg.filename",
-    "props": [
-      {
-        "p": "filename",
-        "v": "./settings.js",
-        "vt": "str"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 190,
-    "y": 120,
-    "wires": [
-      [
-        "a4002"
-      ]
-    ]
-  },
-  {
-    "id": "a4002",
-    "type": "file-read",
-    "name": "Read path from msg.filename",
-    "target": "file",
-    "targetType": "msg",
-    "dynamic": false,
-    "actionRead": true,
-    "actionExists": true,
-    "actionStat": true,
-    "source": "filename",
-    "sourceType": "msg",
-    "x": 440,
-    "y": 120,
-    "wires": [
-      [
-        "a4003"
-      ]
-    ]
-  },
-  {
-    "id": "a4003",
-    "type": "debug",
-    "name": "msg.file",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "file",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 680,
-    "y": 120,
-    "wires": []
-  }
+    {
+        "id": "a4000",
+        "type": "tab",
+        "label": "file-read 04 \u00b7 Message source",
+        "disabled": true,
+        "info": "**Take the path from the message**\n\nThe inject puts the path into `msg.filename`, and the node reads the path from there (source type `msg`).\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Set msg.filename**.\n\n**Effects:** Read-only. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` with `data`, `exists: true` and `stats`.\n\n**Cleanup:** delete your test file when you are done.\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "a4004",
+        "type": "comment",
+        "z": "a4000",
+        "name": "Message source (see the tab's description)",
+        "info": "**Take the path from the message**\n\nThe inject puts the path into `msg.filename`, and the node reads the path from there (source type `msg`).\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Set msg.filename**.\n\n**Effects:** Read-only. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` with `data`, `exists: true` and `stats`.\n\n**Cleanup:** delete your test file when you are done.\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "a4001",
+        "type": "inject",
+        "name": "Set msg.filename",
+        "props": [
+            {
+                "p": "filename",
+                "v": "NODE_RED_EXAMPLE_FILE",
+                "vt": "env"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 190,
+        "y": 120,
+        "wires": [
+            [
+                "a4002"
+            ]
+        ],
+        "z": "a4000"
+    },
+    {
+        "id": "a4002",
+        "type": "file-read",
+        "name": "Read path from msg.filename",
+        "target": "file",
+        "targetType": "msg",
+        "dynamic": false,
+        "actionRead": true,
+        "actionExists": true,
+        "actionStat": true,
+        "source": "filename",
+        "sourceType": "msg",
+        "x": 440,
+        "y": 120,
+        "wires": [
+            [
+                "a4003"
+            ]
+        ],
+        "z": "a4000"
+    },
+    {
+        "id": "a4003",
+        "type": "debug",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 120,
+        "wires": [],
+        "z": "a4000"
+    }
 ]

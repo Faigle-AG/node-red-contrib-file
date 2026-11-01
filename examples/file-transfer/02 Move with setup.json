@@ -1,80 +1,101 @@
 [
-  {
-    "id": "t2001",
-    "type": "inject",
-    "name": "Create source file",
-    "props": [
-      {
-        "p": "payload",
-        "v": "Temporary file to move",
-        "vt": "str"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 180,
-    "y": 120,
-    "wires": [
-      [
-        "t2002"
-      ]
-    ]
-  },
-  {
-    "id": "t2002",
-    "type": "file-write",
-    "name": "Create move-source.txt",
-    "dynamic": false,
-    "action": "write",
-    "target": "./test/data/move-source.txt",
-    "targetType": "str",
-    "data": "payload",
-    "dataType": "msg",
-    "createDir": true,
-    "x": 420,
-    "y": 120,
-    "wires": [
-      [
-        "t2003"
-      ]
-    ]
-  },
-  {
-    "id": "t2003",
-    "type": "file-transfer",
-    "name": "Move file",
-    "dynamic": false,
-    "action": "move",
-    "source": "./test/data/move-source.txt",
-    "sourceType": "str",
-    "destination": "./test/data/archive/moved.txt",
-    "destinationType": "str",
-    "createDir": true,
-    "x": 640,
-    "y": 120,
-    "wires": [
-      [
-        "t2004"
-      ]
-    ]
-  },
-  {
-    "id": "t2004",
-    "type": "debug",
-    "name": "msg.file",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "file",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 840,
-    "y": 120,
-    "wires": []
-  }
+    {
+        "id": "t2000",
+        "type": "tab",
+        "label": "file-transfer 02 \u00b7 Move with setup",
+        "disabled": true,
+        "info": "**Create a file, then move it**\n\nOne button writes a new file and then moves it, in that order, to the moved path.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_OUTPUT`: a disposable file path to create or overwrite\n- `NODE_RED_EXAMPLE_MOVED`: a disposable file path the file is moved to\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Create source file**.\n\n**Effects:** Creates the output file, then moves it (the output path no longer exists afterwards). Deploying does nothing until you click.\n\n**Expected result:** `msg.file` describing the moved file.\n\n**Cleanup:** delete the moved file.\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "t2005",
+        "type": "comment",
+        "z": "t2000",
+        "name": "Move with setup (see the tab's description)",
+        "info": "**Create a file, then move it**\n\nOne button writes a new file and then moves it, in that order, to the moved path.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_OUTPUT`: a disposable file path to create or overwrite\n- `NODE_RED_EXAMPLE_MOVED`: a disposable file path the file is moved to\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Create source file**.\n\n**Effects:** Creates the output file, then moves it (the output path no longer exists afterwards). Deploying does nothing until you click.\n\n**Expected result:** `msg.file` describing the moved file.\n\n**Cleanup:** delete the moved file.\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "t2001",
+        "type": "inject",
+        "name": "Create source file",
+        "props": [
+            {
+                "p": "payload",
+                "v": "Temporary file to move",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 180,
+        "y": 120,
+        "wires": [
+            [
+                "t2002"
+            ]
+        ],
+        "z": "t2000"
+    },
+    {
+        "id": "t2002",
+        "type": "file-write",
+        "name": "Create move-source.txt",
+        "dynamic": false,
+        "action": "write",
+        "target": "NODE_RED_EXAMPLE_OUTPUT",
+        "targetType": "env",
+        "data": "payload",
+        "dataType": "msg",
+        "createDir": true,
+        "x": 420,
+        "y": 120,
+        "wires": [
+            [
+                "t2003"
+            ]
+        ],
+        "z": "t2000"
+    },
+    {
+        "id": "t2003",
+        "type": "file-transfer",
+        "name": "Move file",
+        "dynamic": false,
+        "action": "move",
+        "source": "NODE_RED_EXAMPLE_OUTPUT",
+        "sourceType": "env",
+        "destination": "NODE_RED_EXAMPLE_MOVED",
+        "destinationType": "env",
+        "createDir": true,
+        "x": 640,
+        "y": 120,
+        "wires": [
+            [
+                "t2004"
+            ]
+        ],
+        "z": "t2000"
+    },
+    {
+        "id": "t2004",
+        "type": "debug",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 120,
+        "wires": [],
+        "z": "t2000"
+    }
 ]

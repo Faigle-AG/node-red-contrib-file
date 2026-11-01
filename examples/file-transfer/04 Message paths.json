@@ -1,66 +1,86 @@
 [
-  {
-    "id": "t4001",
-    "type": "inject",
-    "name": "Set source + destination",
-    "props": [
-      {
-        "p": "sourcePath",
-        "v": "./settings.js",
-        "vt": "str"
-      },
-      {
-        "p": "destinationPath",
-        "v": "./test/data/from-message.js",
-        "vt": "str"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 190,
-    "y": 120,
-    "wires": [
-      [
-        "t4002"
-      ]
-    ]
-  },
-  {
-    "id": "t4002",
-    "type": "file-transfer",
-    "name": "Copy paths from msg",
-    "dynamic": false,
-    "action": "copy",
-    "source": "sourcePath",
-    "sourceType": "msg",
-    "destination": "destinationPath",
-    "destinationType": "msg",
-    "createDir": true,
-    "x": 440,
-    "y": 120,
-    "wires": [
-      [
-        "t4003"
-      ]
-    ]
-  },
-  {
-    "id": "t4003",
-    "type": "debug",
-    "name": "msg.file",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "file",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 650,
-    "y": 120,
-    "wires": []
-  }
+    {
+        "id": "t4000",
+        "type": "tab",
+        "label": "file-transfer 04 \u00b7 Message paths",
+        "disabled": true,
+        "info": "**Take both paths from the message**\n\nThe inject puts the source and destination into `msg.sourcePath` and `msg.destinationPath`, and the node copies between them.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n- `NODE_RED_EXAMPLE_COPY`: a disposable file path for the copy\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Set source + destination**.\n\n**Effects:** Creates or overwrites the copy. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` describing the copy.\n\n**Cleanup:** delete the copy and your test file.\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "t4004",
+        "type": "comment",
+        "z": "t4000",
+        "name": "Message paths (see the tab's description)",
+        "info": "**Take both paths from the message**\n\nThe inject puts the source and destination into `msg.sourcePath` and `msg.destinationPath`, and the node copies between them.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n- `NODE_RED_EXAMPLE_COPY`: a disposable file path for the copy\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Set source + destination**.\n\n**Effects:** Creates or overwrites the copy. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` describing the copy.\n\n**Cleanup:** delete the copy and your test file.\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "t4001",
+        "type": "inject",
+        "name": "Set source + destination",
+        "props": [
+            {
+                "p": "sourcePath",
+                "v": "NODE_RED_EXAMPLE_FILE",
+                "vt": "env"
+            },
+            {
+                "p": "destinationPath",
+                "v": "NODE_RED_EXAMPLE_COPY",
+                "vt": "env"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 190,
+        "y": 120,
+        "wires": [
+            [
+                "t4002"
+            ]
+        ],
+        "z": "t4000"
+    },
+    {
+        "id": "t4002",
+        "type": "file-transfer",
+        "name": "Copy paths from msg",
+        "dynamic": false,
+        "action": "copy",
+        "source": "sourcePath",
+        "sourceType": "msg",
+        "destination": "destinationPath",
+        "destinationType": "msg",
+        "createDir": true,
+        "x": 440,
+        "y": 120,
+        "wires": [
+            [
+                "t4003"
+            ]
+        ],
+        "z": "t4000"
+    },
+    {
+        "id": "t4003",
+        "type": "debug",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 120,
+        "wires": [],
+        "z": "t4000"
+    }
 ]

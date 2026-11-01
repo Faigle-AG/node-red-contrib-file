@@ -1,8 +1,25 @@
 [
     {
+        "id": "w2000",
+        "type": "tab",
+        "label": "file-write 02 \u00b7 Append",
+        "disabled": true,
+        "info": "**Append a log line**\n\nEach click appends one line with the current time to the log path.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_LOG`: a disposable file path to append lines to\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Append log line**.\n\n**Effects:** Creates the log file if needed, then appends one line per click. Deploying does nothing until you click.\n\n**Expected result:** one more line per click, and `msg.file` describing the log.\n\n**Cleanup:** delete the log file.\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "w2004",
+        "type": "comment",
+        "z": "w2000",
+        "name": "Append (see the tab's description)",
+        "info": "**Append a log line**\n\nEach click appends one line with the current time to the log path.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_LOG`: a disposable file path to append lines to\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Append log line**.\n\n**Effects:** Creates the log file if needed, then appends one line per click. Deploying does nothing until you click.\n\n**Expected result:** one more line per click, and `msg.file` describing the log.\n\n**Cleanup:** delete the log file.\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
         "id": "w2001",
         "type": "inject",
-        "z": "c9c0e06e4d779068",
+        "z": "w2000",
         "name": "Append log line",
         "props": [
             {
@@ -27,12 +44,12 @@
     {
         "id": "w2002",
         "type": "file-write",
-        "z": "c9c0e06e4d779068",
+        "z": "w2000",
         "name": "Append application.log",
         "dynamic": false,
         "action": "append",
-        "target": "./test/data/application.log",
-        "targetType": "str",
+        "target": "NODE_RED_EXAMPLE_LOG",
+        "targetType": "env",
         "data": "payload",
         "dataType": "msg",
         "createDir": true,
@@ -47,7 +64,7 @@
     {
         "id": "w2003",
         "type": "debug",
-        "z": "c9c0e06e4d779068",
+        "z": "w2000",
         "name": "msg.file",
         "active": true,
         "tosidebar": true,
@@ -60,13 +77,5 @@
         "x": 770,
         "y": 1020,
         "wires": []
-    },
-    {
-        "id": "2a2710dd28e21150",
-        "type": "global-config",
-        "env": [],
-        "modules": {
-            "@faigle/node-red-contrib-file": "0.2.5"
-        }
     }
 ]

@@ -1,56 +1,76 @@
 [
-  {
-    "id": "a1001",
-    "type": "inject",
-    "name": "Read settings.js",
-    "props": [],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 200,
-    "y": 120,
-    "wires": [
-      [
-        "a1002"
-      ]
-    ]
-  },
-  {
-    "id": "a1002",
-    "type": "file-read",
-    "name": "Read settings.js",
-    "target": "file",
-    "targetType": "msg",
-    "dynamic": false,
-    "actionRead": true,
-    "actionExists": true,
-    "actionStat": true,
-    "source": "./settings.js",
-    "sourceType": "str",
-    "x": 400,
-    "y": 120,
-    "wires": [
-      [
-        "a1003"
-      ]
-    ]
-  },
-  {
-    "id": "a1003",
-    "type": "debug",
-    "name": "msg.file",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "file",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 590,
-    "y": 120,
-    "wires": []
-  }
+    {
+        "id": "a1000",
+        "type": "tab",
+        "label": "file-read 01 \u00b7 Static read",
+        "disabled": true,
+        "info": "**Read one file you choose**\n\nReads a file, checks that it exists and reads its stats, all in one input. The result is `msg.file`: `data` (a Buffer), `exists`, `stats`, and `path`, `dir`, `name`, `base` and `ext`.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Read the example file**.\n\n**Effects:** Read-only. Deploying does nothing until you click.\n\n**Expected result:** the Debug sidebar shows `msg.file` with `data`, `exists: true` and `stats`.\n\n**Cleanup:** delete your test file when you are done.\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "a1004",
+        "type": "comment",
+        "z": "a1000",
+        "name": "Static read (see the tab's description)",
+        "info": "**Read one file you choose**\n\nReads a file, checks that it exists and reads its stats, all in one input. The result is `msg.file`: `data` (a Buffer), `exists`, `stats`, and `path`, `dir`, `name`, `base` and `ext`.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click **Read the example file**.\n\n**Effects:** Read-only. Deploying does nothing until you click.\n\n**Expected result:** the Debug sidebar shows `msg.file` with `data`, `exists: true` and `stats`.\n\n**Cleanup:** delete your test file when you are done.\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "a1001",
+        "type": "inject",
+        "name": "Read the example file",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 200,
+        "y": 120,
+        "wires": [
+            [
+                "a1002"
+            ]
+        ],
+        "z": "a1000"
+    },
+    {
+        "id": "a1002",
+        "type": "file-read",
+        "name": "Read NODE_RED_EXAMPLE_FILE",
+        "target": "file",
+        "targetType": "msg",
+        "dynamic": false,
+        "actionRead": true,
+        "actionExists": true,
+        "actionStat": true,
+        "source": "NODE_RED_EXAMPLE_FILE",
+        "sourceType": "env",
+        "x": 400,
+        "y": 120,
+        "wires": [
+            [
+                "a1003"
+            ]
+        ],
+        "z": "a1000"
+    },
+    {
+        "id": "a1003",
+        "type": "debug",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 590,
+        "y": 120,
+        "wires": [],
+        "z": "a1000"
+    }
 ]

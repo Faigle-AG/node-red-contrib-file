@@ -1,110 +1,132 @@
 [
-  {
-    "id": "a2001",
-    "type": "inject",
-    "name": "Read + exists",
-    "props": [
-      {
-        "p": "file",
-        "v": "{\"action\":[\"read\",\"exists\"],\"path\":\"./settings.js\"}",
-        "vt": "json"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 180,
-    "y": 80,
-    "wires": [
-      [
-        "a2004"
-      ]
-    ]
-  },
-  {
-    "id": "a2002",
-    "type": "inject",
-    "name": "Get stat",
-    "props": [
-      {
-        "p": "file",
-        "v": "{\"action\":\"stat\",\"path\":\"./settings.js\"}",
-        "vt": "json"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 160,
-    "y": 140,
-    "wires": [
-      [
-        "a2004"
-      ]
-    ]
-  },
-  {
-    "id": "a2003",
-    "type": "inject",
-    "name": "Check missing file",
-    "props": [
-      {
-        "p": "file",
-        "v": "{\"action\":\"exists\",\"path\":\"./does-not-exist.txt\"}",
-        "vt": "json"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 5,
-    "topic": "",
-    "x": 190,
-    "y": 200,
-    "wires": [
-      [
-        "a2004"
-      ]
-    ]
-  },
-  {
-    "id": "a2004",
-    "type": "file-read",
-    "name": "Dynamic file operation",
-    "target": "file",
-    "targetType": "msg",
-    "dynamic": true,
-    "actionRead": false,
-    "actionExists": false,
-    "actionStat": false,
-    "source": "",
-    "sourceType": "str",
-    "x": 440,
-    "y": 140,
-    "wires": [
-      [
-        "a2005"
-      ]
-    ]
-  },
-  {
-    "id": "a2005",
-    "type": "debug",
-    "name": "msg.file",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "file",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 650,
-    "y": 140,
-    "wires": []
-  }
+    {
+        "id": "a2000",
+        "type": "tab",
+        "label": "file-read 02 \u00b7 Dynamic actions",
+        "disabled": true,
+        "info": "**Choose the action per message**\n\nWith **Load from msg.file**, each message names its own action and path in `msg.file`. These three buttons read and check a file, read its stats, and check a path that does not exist.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n- `NODE_RED_EXAMPLE_MISSING`: a path that does not exist, for the missing-file check\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click any of the three buttons.\n\n**Effects:** Read-only. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` with `data` and `exists: true`; then `stats`; then `exists: false` for the missing path.\n\n**Cleanup:** none needed (nothing is written).\n\n**Not verified:** Windows paths, and behaviour in the editor."
+    },
+    {
+        "id": "a2006",
+        "type": "comment",
+        "z": "a2000",
+        "name": "Dynamic actions (see the tab's description)",
+        "info": "**Choose the action per message**\n\nWith **Load from msg.file**, each message names its own action and path in `msg.file`. These three buttons read and check a file, read its stats, and check a path that does not exist.\n\n**Prerequisites:** the `@faigle/node-red-contrib-file` package.\n\n**Setup:** before you start Node-RED, set these environment variables to **absolute** paths in a\ndisposable folder. A literal `~` or `${...}` is not expanded:\n- `NODE_RED_EXAMPLE_FILE`: an existing, disposable text file to read or copy\n- `NODE_RED_EXAMPLE_MISSING`: a path that does not exist, for the missing-file check\n\nConfigure **all** listed variables before you enable the tab. Each node checks its own paths when the flow reaches it: if one is\nunset, that node reports its path as missing and stops, but earlier steps of the same click may already have created or changed\nfiles. Nothing is rolled back.\n\n**Activation:** this tab is disabled. Enable it, deploy, then click any of the three buttons.\n\n**Effects:** Read-only. Deploying does nothing until you click.\n\n**Expected result:** `msg.file` with `data` and `exists: true`; then `stats`; then `exists: false` for the missing path.\n\n**Cleanup:** none needed (nothing is written).\n\n**Not verified:** Windows paths, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "a2001",
+        "type": "inject",
+        "name": "Read + exists",
+        "props": [
+            {
+                "p": "file",
+                "v": "{\"action\": [\"read\",\"exists\"], \"path\": $env(\"NODE_RED_EXAMPLE_FILE\")}",
+                "vt": "jsonata"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 180,
+        "y": 80,
+        "wires": [
+            [
+                "a2004"
+            ]
+        ],
+        "z": "a2000"
+    },
+    {
+        "id": "a2002",
+        "type": "inject",
+        "name": "Get stat",
+        "props": [
+            {
+                "p": "file",
+                "v": "{\"action\": \"stat\", \"path\": $env(\"NODE_RED_EXAMPLE_FILE\")}",
+                "vt": "jsonata"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 160,
+        "y": 140,
+        "wires": [
+            [
+                "a2004"
+            ]
+        ],
+        "z": "a2000"
+    },
+    {
+        "id": "a2003",
+        "type": "inject",
+        "name": "Check missing file",
+        "props": [
+            {
+                "p": "file",
+                "v": "{\"action\": \"exists\", \"path\": $env(\"NODE_RED_EXAMPLE_MISSING\")}",
+                "vt": "jsonata"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 5,
+        "topic": "",
+        "x": 190,
+        "y": 200,
+        "wires": [
+            [
+                "a2004"
+            ]
+        ],
+        "z": "a2000"
+    },
+    {
+        "id": "a2004",
+        "type": "file-read",
+        "name": "Dynamic file operation",
+        "target": "file",
+        "targetType": "msg",
+        "dynamic": true,
+        "actionRead": false,
+        "actionExists": false,
+        "actionStat": false,
+        "source": "",
+        "sourceType": "str",
+        "x": 440,
+        "y": 140,
+        "wires": [
+            [
+                "a2005"
+            ]
+        ],
+        "z": "a2000"
+    },
+    {
+        "id": "a2005",
+        "type": "debug",
+        "name": "msg.file",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "file",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 140,
+        "wires": [],
+        "z": "a2000"
+    }
 ]
