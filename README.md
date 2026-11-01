@@ -142,7 +142,28 @@ msg.file = {
 return msg;
 ```
 
-Configured input paths/data support `msg`, `flow`, `global`, `str`, `jsonata`, and `env`. Read output supports `msg`, `flow`, and `global`; it defaults to `msg.file`. Write data defaults to the typed property `msg.file.data`. For the default static `file.data` setting, `msg.file = {}` resolves to an empty string and writes an empty file; omitting `msg.file` entirely instead causes a TypeError with code `DATA_MISSING` and writes nothing. Successful typed resolutions of undefined/null become an empty string. Dynamic `msg.file.data` is read directly: missing data errors, while `null` writes the text `null`. Strings and Buffers are supported; non-Buffer objects are JSON-stringified. Dynamic numeric/boolean data is rejected by the local filesystem API with `ERR_INVALID_ARG_TYPE`, unlike Azure's scalar-to-string conversion. Empty string and zero-length Buffer are valid.
+Configured input paths support `msg`, `flow`, `global`, `str`, `jsonata`, and `env`; write data also offers `json` and `bin`. Read output supports `msg`, `flow`, and `global`; it defaults to `msg.file`. Write data defaults to the typed property `msg.file.data`. For the default static `file.data` setting, `msg.file = {}` resolves to an empty string and writes an empty file; omitting `msg.file` entirely instead causes a TypeError with code `DATA_MISSING` and writes nothing. Successful typed resolutions of undefined/null become an empty string. Dynamic `msg.file.data` is read directly: missing data errors, while `null` writes the text `null`. Strings and Buffers are supported; non-Buffer objects are JSON-stringified. Numeric/boolean data, whether resolved from a typed field or supplied dynamically, is rejected by the local filesystem API with `ERR_INVALID_ARG_TYPE`, unlike Azure's scalar-to-string conversion. Empty string and zero-length Buffer are valid.
+
+#### Typed-input reference
+
+Defaults below describe newly configured editor nodes, not migrations of older saved flows.
+
+| Node            | Field                | Offered types                                                   | Editor default     |
+| --------------- | -------------------- | --------------------------------------------------------------- | ------------------ |
+| `file-read`     | `source`             | `msg`, `flow`, `global`, `str`, `jsonata`, `env`                | `str`, empty       |
+| `file-read`     | `target` (Output To) | `msg`, `flow`, `global`                                         | `msg`, `file`      |
+| `file-write`    | `target` (File name) | `msg`, `flow`, `global`, `str`, `jsonata`, `env`                | `str`, empty       |
+| `file-write`    | `data`               | `msg`, `flow`, `global`, `str`, `json`, `bin`, `jsonata`, `env` | `msg`, `file.data` |
+| `file-transfer` | `source`             | `msg`, `flow`, `global`, `str`, `jsonata`, `env`                | `str`, empty       |
+| `file-transfer` | `destination`        | `msg`, `flow`, `global`, `str`, `jsonata`, `env`                | `str`, empty       |
+
+For write data, a `json` object or array is serialized to JSON text; a JSON string literal such as `"plain"` writes the plain string. A `bin` literal such as `[0,255,104]` writes those bytes. JSON numbers and booleans are not converted to text. A successfully evaluated JSON `null` becomes an empty string through the property helper and writes an empty file; this differs from direct dynamic `msg.file.data: null`, which writes `null` as described above.
+
+For `flow` and `global`, Node-RED's encoded key syntax can select a named context store, for example `#:(storeName)::result`. The store must be configured in Node-RED; availability and persistence depend on that backend.
+
+**Saved-flow compatibility:** Existing field names, saved type defaults and runtime value fallbacks remain. The data widget's declared fallback now agrees with its existing `msg` saved/runtime default; an explicit saved `str` setting is not changed. Missing or empty static `data` still falls back to `file.data`.
+
+Active fields now reject unoffered type tags before property evaluation or filesystem work. This intentionally rejects some hand-edited or imported configurations that previously worked. Static fields bypassed by **Load from msg.file** are not checked, but file-read's output routing remains active. A static delete's destination type is not checked, although the existing implementation still evaluates the configured destination value. These are type-tag checks, not a filesystem sandbox or a guarantee that a later context write succeeds.
 
 ### Outputs
 
@@ -171,6 +192,8 @@ Errors go to Node-RED's error/Catch mechanism rather than the normal output. The
 | Default static `file.data` with no `msg.file` object        | TypeError with `DATA_MISSING`; no file written; status remains `Configuration error`                                                                                                                        |
 | Unrecognized read token                                     | Legacy parser may perform no actions and forward metadata; use documented tokens                                                                                                                            |
 | Non-string file-read path                                   | `INVALID_PATH`; falsy path values are reported as missing                                                                                                                                                   |
+| Unsupported active path/data type                           | `INVALID_CONFIGURATION`; no filesystem operation starts                                                                                                                                                     |
+| Unsupported file-read output type                           | Uncoded `Unsupported target property type: ...` error before reading the file                                                                                                                               |
 | Typed output/context failure                                | Error; a storage operation may already have happened                                                                                                                                                        |
 
 Paths use the host operating system's `path.normalize`. Relative paths, absolute paths and dot segments are allowed; significant spaces are not trimmed. **This is not a filesystem sandbox.** Validate untrusted paths in the flow, restrict the runtime account's permissions, and avoid directing writable input at sensitive files.

@@ -1,3 +1,10 @@
+// The types each typed field offers in the editor (Phase 2.9). A configured type outside these
+// fails clearly before anything is read or changed.
+const TYPES = {
+    source: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+    target: ['msg', 'flow', 'global'],
+};
+
 module.exports = function (RED) {
     const fs = require('fs');
     const path = require('path');
@@ -38,6 +45,17 @@ module.exports = function (RED) {
                 if (done) done();
             };
             try {
+                // Dynamic mode ignores the static source, so its type is not checked there.
+                if (!node.dynamic && !TYPES.source.includes(node.sourceType)) {
+                    throw createError(
+                        `Source type '${node.sourceType}' is not supported`,
+                        'INVALID_CONFIGURATION',
+                    );
+                }
+                if (!TYPES.target.includes(node.targetType)) {
+                    throw new Error(`Unsupported target property type: ${node.targetType}`);
+                }
+
                 let sourcePathRaw;
                 let runRead;
                 let runExists;
@@ -143,3 +161,5 @@ module.exports = function (RED) {
 
     RED.nodes.registerType('file-read', FileReadNode);
 };
+
+module.exports.TYPES = TYPES;

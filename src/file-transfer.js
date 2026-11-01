@@ -1,3 +1,10 @@
+// The types each typed field offers in the editor (Phase 2.9). A configured type outside these
+// fails clearly before anything is read or changed.
+const TYPES = {
+    source: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+    destination: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+};
+
 module.exports = function (RED) {
     const fs = require('fs');
     const path = require('path');
@@ -36,6 +43,22 @@ module.exports = function (RED) {
                 if (done) done();
             };
             try {
+                // Dynamic mode ignores the static paths, and a delete never uses the destination, so
+                // those types are not checked.
+                if (!node.dynamic) {
+                    const fields = [['source', 'Source']];
+                    if (node.action !== 'delete') fields.push(['destination', 'Destination']);
+                    for (const [field, label] of fields) {
+                        const type = node[`${field}Type`];
+                        if (!TYPES[field].includes(type)) {
+                            throw createError(
+                                `${label} type '${type}' is not supported`,
+                                'INVALID_CONFIGURATION',
+                            );
+                        }
+                    }
+                }
+
                 const currentAction = node.dynamic ? msg.file && msg.file.action : node.action;
                 const srcRaw = node.dynamic
                     ? msg.file && msg.file.source
@@ -185,3 +208,5 @@ module.exports = function (RED) {
 
     RED.nodes.registerType('file-transfer', FileTransferNode);
 };
+
+module.exports.TYPES = TYPES;
